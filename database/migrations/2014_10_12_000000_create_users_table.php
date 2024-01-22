@@ -15,18 +15,19 @@ return new class extends Migration
             $table->id();
             $table->string('name');
             $table->string('email')->unique();
-            $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
+            $table->bigInteger('phone')->nullable();
+            $table->bigInteger('mobile')->nullable();
+            $table->enum('licenses', ['basic','premium']);
+            $table->enum('web_type', ['zoom','microsoft', 'adobe', 'mathlab', 'minitab']);
+            $table->string('department')->nullable();
+            $table->enum('role', ['superAdmin','admin', 'user']);
+            $table->timestamp('email_verified_at')->nullable();
             $table->rememberToken();
             $table->timestamps();
         });
 
-          // Seed a user with a hashed password
-          DB::table('users')->insert([
-            'name' => 'Example User',
-            'email' => 'user@example.com',
-            'password' => Hash::make('password'), // Hash the password here
-        ]);
+         
     }
 
     /**
