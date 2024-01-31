@@ -11,11 +11,7 @@ class Ticketing extends Model
     protected $table = 'ticketing';
 
     protected $fillable = [
-       'name', 'email', 'password', 'phone', 'mobile', 'licenses', 'web_type', 'department', 'role'
+       'assign', 'createdDate', 'dueDate', 'status', 'site', 'priority', 'group'
     ];
 
-    public function user()
-    {
-        return $this->belongsTo(User::class, 'user_id');
-    }
 }

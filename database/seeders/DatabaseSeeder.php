@@ -13,10 +13,10 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        $this->call([
-            UserSeeder::class,
-            TicketingSeeder::class,
-        ]);
+        // $this->call([
+        //     UserSeeder::class,
+        //     TicketingSeeder::class,
+        // ]);
 
         User::create([
             'name' => 'Example User',

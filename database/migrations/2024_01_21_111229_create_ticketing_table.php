@@ -13,17 +13,14 @@ return new class extends Migration
     {
         Schema::create('ticketing', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('user_id');
-            $table->foreign('user_id')->references('id')->on('users');
-            $table->string('requester_name');
-            $table->string('subject');
-            $table->enum('assign', ['administrator', 'Ami Nellasari', 'Ario Sutomo', 'Helpdesk DTI', 'Iwan Setiawan', 'Manager DTI', 'Mohammad Erwin Saputra', 'Ops1', 'Ops2', 'Ops3']);
-            $table->date('createdDate');
-            $table->date('dueDate');
-            $table->enum('status', ['open', 'in progress', 'closed', 'resolved']);
-            $table->enum('site', ['ITB', 'ITB Jatinangor', 'softwareone']);
-            $table->enum('priority', ['High', 'Low', 'Normal', 'Urgent']);
-            $table->string('group');
+            $table->integer('id_scrape');
+            $table->string('assign')->nullable();  //, ['administrator', 'Ami Nellasari', 'Ario Sutomo', 'Helpdesk DTI', 'Iwan Setiawan', 'Manager DTI', 'Mohammad Erwin Saputra', 'Ops1', 'Ops2', 'Ops3']);
+            $table->date('createdDate')->nullable();
+            $table->date('dueDate')->nullable();
+            $table->string('status')->nullable(); //, ['open', 'in progress', 'closed', 'resolved']);
+            $table->string('site')->nullable();  //, ['ITB', 'ITB Jatinangor', 'softwareone']);
+            $table->string('priority')->nullable();  //, ['High', 'Low', 'Normal', 'Urgent']);
+            $table->string('group')->nullable();
             $table->timestamps();
         });
     }
