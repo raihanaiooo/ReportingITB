@@ -7,6 +7,7 @@ const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
 const fetchData = async () => {
 	const allRequestIds = new Set(); // Menyimpan ID setiap request yang sudah diambil
+
 	const fetchPage = async (page, retry = 0) => {
 		const row_count = 25;
 		const start_index = (page - 1) * row_count;
@@ -51,8 +52,9 @@ const fetchData = async () => {
 					"sec-fetch-site": "same-origin",
 					"x-requested-with": "XMLHttpRequest",
 					cookie:
-						"_ga=GA1.1.739500913.1706082526; _ga_T9ZME3XCCM=GS1.1.1706085642.2.0.1706085642.60.0.0; _ga_FZR0YZY0W6=GS1.1.1706085642.2.0.1706085642.0.0.0; SDPSESSIONID=70AD9684D81CC088533B84A6F3F2AC36; JSESSIONIDSSO=807AB6C704970D1DB253A483935F0BFA; PORTALID=1; sdpcsrfcookie=1f3f7c1101a7f8e5e6c3058d670cf5a1707330aa7e15f2688713497ff17c462bdd39798ca087477d1d428d5a7bb2dae7cdcf9149e8abadecd9a2622cf2d899d5; _zcsr_tmp=1f3f7c1101a7f8e5e6c3058d670cf5a1707330aa7e15f2688713497ff17c462bdd39798ca087477d1d428d5a7bb2dae7cdcf9149e8abadecd9a2622cf2d899d5",
-					Referer: "https://it-helpdesk.itb.ac.id/WOListView.do",
+						"_gid=GA1.3.421784375.1706749856; _ga=GA1.1.739500913.1706082526; _ga_T9ZME3XCCM=GS1.1.1706763419.5.0.1706763419.60.0.0; _ga_FZR0YZY0W6=GS1.1.1706763419.5.0.1706763419.0.0.0; SDPSESSIONID=E62899ECE605274A671113E6E2233B0E; JSESSIONIDSSO=0FEE61B9B696F1A4E4FB2375DEEDC1F5; PORTALID=1; sdpcsrfcookie=dfc5027b7552b885f1a0b7282ada506e8795f233082e5860d09489d05d921fca299709e8d780b247b0e928d372f1e6c1bc139a404ee0f66ea36636555406e0bf; _zcsr_tmp=dfc5027b7552b885f1a0b7282ada506e8795f233082e5860d09489d05d921fca299709e8d780b247b0e928d372f1e6c1bc139a404ee0f66ea36636555406e0bf",
+					Referer:
+						"https://it-helpdesk.itb.ac.id/WOListView.do?viewID=30&globalViewName=Service_Requests",
 					"Referrer-Policy": "strict-origin-when-cross-origin",
 				},
 			});
@@ -83,7 +85,22 @@ const fetchData = async () => {
 			currentPageRequests.forEach((request) => {
 				allRequestIds.add(request.id);
 			});
+			await Promise.all(
+				currentPageRequests.map(async (request) => {
+					try {
+						await insertIntoDb({ requests: [{ id: request.id }] });
 
+						console.log(
+							`Data with ID ${request.id} inserted into the database.`
+						);
+					} catch (error) {
+						console.error(
+							`Error inserting data with ID ${request.id}:`,
+							error.message
+						);
+					}
+				})
+			);
 			const nextPageRequests = await fetchPage(page + 1);
 			await delay(1000); // Introduce a delay of 1 second between requests
 			return uniqueRequests.concat(nextPageRequests);
@@ -113,6 +130,21 @@ const fetchData = async () => {
 
 	try {
 		const allRequests = await fetchPage(1);
+
+		// Use Promise.all to concurrently insert data into the database
+		await Promise.all(
+			allRequests.map(async (request) => {
+				try {
+					await insertIntoDb({ id: request.id });
+					console.log(`Data with ID ${request.id} inserted into the database.`);
+				} catch (error) {
+					console.error(
+						`Error inserting data with ID ${request.id}:`,
+						error.message
+					);
+				}
+			})
+		);
 
 		for (const request of allRequests) {
 			try {
