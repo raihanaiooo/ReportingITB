@@ -11,7 +11,15 @@ class Ticketing extends Model
     protected $table = 'ticketing';
 
     protected $fillable = [
-       'assign', 'createdDate', 'dueDate', 'status', 'site', 'priority', 'group'
+       'id_scrape', 'createdDate', 'dueDate', 'status_id'
     ];
+    // public function setStatusAttribute($value)
+    // {
+    //     $this->attributes['status'] = (int) $value;
+    // }
+    public function status()
+    {
+        return $this->belongsTo(Status::class, 'status_id'); // 'status_id' should match your actual foreign key in the 'ticketing' table.
+    }
 
 }

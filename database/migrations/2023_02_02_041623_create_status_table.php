@@ -11,13 +11,9 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('ticketing', function (Blueprint $table) {
+        Schema::create('status', function (Blueprint $table) {
             $table->id();
-            $table->integer('id_scrape');
-            $table->date('createdDate')->nullable();
-            $table->date('dueDate')->nullable();
-            $table->unsignedBigInteger('status_id')->nullable();
-            $table->foreign('status_id')->references('id')->on('status')->onDelete('set null');
+            $table->string("name");
             $table->timestamps();
         });
     }
@@ -27,6 +23,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('ticketing');
+        Schema::dropIfExists('status');
     }
 };
