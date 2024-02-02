@@ -25,12 +25,24 @@ const insertIntoDb = async (data) => {
 		// Begin a transaction
 		await connection.beginTransaction();
 
-		// Use the promisified query function
-		await queryAsync("SELECT 1");
+		// Iterate over requests and insert into the 'ticketing' table
+		for (const { id, status } of data.requests) {
+			// Fetch the corresponding status_id from the 'status' table based on the 'status' name
+			const statusResult = await queryAsync(
+				"SELECT id FROM status WHERE name = ?",
+				[status]
+			);
 
-		for (const { id } of data.requests) {
-			const sql = "INSERT INTO ticketing (id_scrape) VALUES (?)";
-			const values = [id];
+			if (statusResult[0].length === 0) {
+				console.log(`Status '${status}' not found in the database.`);
+				continue;
+			}
+
+			const statusId = statusResult[0][0].id;
+
+			// Insert into the 'ticketing' table with the corresponding status_id
+			const sql = "INSERT INTO ticketing (id_scrape, status_id) VALUES (?, ?)";
+			const values = [id, statusId];
 			const results = await queryAsync(sql, values);
 
 			console.log(

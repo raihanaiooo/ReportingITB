@@ -25,7 +25,7 @@ const fetchData = async () => {
 			"is_service_request": true
 		  },
 		  "fields_required": [
-			"requester"
+			"requester", "status"
 		  ],
 		  "get_total_count": true
 		}
@@ -52,7 +52,7 @@ const fetchData = async () => {
 					"sec-fetch-site": "same-origin",
 					"x-requested-with": "XMLHttpRequest",
 					cookie:
-						"_gid=GA1.3.421784375.1706749856; _ga=GA1.1.739500913.1706082526; _ga_T9ZME3XCCM=GS1.1.1706763419.5.0.1706763419.60.0.0; _ga_FZR0YZY0W6=GS1.1.1706763419.5.0.1706763419.0.0.0; SDPSESSIONID=E62899ECE605274A671113E6E2233B0E; JSESSIONIDSSO=0FEE61B9B696F1A4E4FB2375DEEDC1F5; PORTALID=1; sdpcsrfcookie=dfc5027b7552b885f1a0b7282ada506e8795f233082e5860d09489d05d921fca299709e8d780b247b0e928d372f1e6c1bc139a404ee0f66ea36636555406e0bf; _zcsr_tmp=dfc5027b7552b885f1a0b7282ada506e8795f233082e5860d09489d05d921fca299709e8d780b247b0e928d372f1e6c1bc139a404ee0f66ea36636555406e0bf",
+						"_ga=GA1.1.739500913.1706082526; _ga_T9ZME3XCCM=GS1.1.1706763419.5.0.1706763419.60.0.0; _ga_FZR0YZY0W6=GS1.1.1706763419.5.0.1706763419.0.0.0; SDPSESSIONID=281C49675154BC7CDA1DEFEFB94DBB69; JSESSIONIDSSO=CAFB4903D88BF8110B3774196AE17E74; PORTALID=1; sdpcsrfcookie=1ebc817cea98cc7879450dc7d552de45d65e553a2444ed2d6e52533cbde8104c97a42fef1da748978563c36e52ec412ed1f2a8b9f81db29f8925f23a6a23bdb1; _zcsr_tmp=1ebc817cea98cc7879450dc7d552de45d65e553a2444ed2d6e52533cbde8104c97a42fef1da748978563c36e52ec412ed1f2a8b9f81db29f8925f23a6a23bdb1",
 					Referer:
 						"https://it-helpdesk.itb.ac.id/WOListView.do?viewID=30&globalViewName=Service_Requests",
 					"Referrer-Policy": "strict-origin-when-cross-origin",
@@ -85,14 +85,38 @@ const fetchData = async () => {
 			currentPageRequests.forEach((request) => {
 				allRequestIds.add(request.id);
 			});
+
+			// Specify the statuses you want to fetch
+			const allowedStatuses = ["Open", "In Progress", "Closed", "Resolved"];
+
 			await Promise.all(
 				currentPageRequests.map(async (request) => {
 					try {
-						await insertIntoDb({ requests: [{ id: request.id }] });
+						// Check if 'status' is defined and has the 'name' property
+						if (request.status && request.status.name) {
+							const statusName = request.status.name;
 
-						console.log(
-							`Data with ID ${request.id} inserted into the database.`
-						);
+							// Check if the status is one of the allowed statuses
+							if (allowedStatuses.includes(statusName)) {
+								await insertIntoDb({
+									requests: [{ id: request.id, status: statusName }],
+								});
+
+								console.log(
+									`Data with ID ${request.id} inserted into the database.`
+								);
+							} else {
+								console.log(
+									`Skipping request with ID ${request.id} due to invalid status.`
+								);
+								console.log("Invalid Status Object:", request.status);
+							}
+						} else {
+							console.log(
+								`Skipping request with ID ${request.id} due to undefined or invalid status.`
+							);
+							console.log("Invalid Status Object:", request.status);
+						}
 					} catch (error) {
 						console.error(
 							`Error inserting data with ID ${request.id}:`,
@@ -101,6 +125,7 @@ const fetchData = async () => {
 					}
 				})
 			);
+
 			const nextPageRequests = await fetchPage(page + 1);
 			await delay(1000); // Introduce a delay of 1 second between requests
 			return uniqueRequests.concat(nextPageRequests);
@@ -130,32 +155,6 @@ const fetchData = async () => {
 
 	try {
 		const allRequests = await fetchPage(1);
-
-		// Use Promise.all to concurrently insert data into the database
-		await Promise.all(
-			allRequests.map(async (request) => {
-				try {
-					await insertIntoDb({ id: request.id });
-					console.log(`Data with ID ${request.id} inserted into the database.`);
-				} catch (error) {
-					console.error(
-						`Error inserting data with ID ${request.id}:`,
-						error.message
-					);
-				}
-			})
-		);
-
-		for (const request of allRequests) {
-			try {
-				await insertIntoDb({ id: request.id });
-			} catch (error) {
-				console.error(
-					`Error inserting data with ID ${request.id} into the database:`,
-					error.message
-				);
-			}
-		}
 
 		console.log("Data insertion completed.");
 		const requesterNames = allRequests.map((request) => request.requester.name);
