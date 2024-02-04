@@ -13,23 +13,23 @@ const fetchData = async () => {
 		const start_index = (page - 1) * row_count;
 
 		const queryParams = encodeURIComponent(`{
-		"list_info": {
-		  "start_index": ${start_index},
-		  "sort_field": "requester.name",
-		  "filter_by": {
-			"id": "30"
-		  },
-		  "sort_order": "asc",
-		  "row_count": "${row_count}",
-		  "search_fields": {
-			"is_service_request": true
-		  },
-		  "fields_required": [
-			"requester", "status"
-		  ],
-		  "get_total_count": true
-		}
-	  }`);
+            "list_info": {
+                "start_index": ${start_index},
+                "sort_field": "requester.name",
+                "filter_by": {
+                    "id": "30"
+                },
+                "sort_order": "asc",
+                "row_count": "${row_count}",
+                "search_fields": {
+                    "is_service_request": true
+                },
+                "fields_required": [
+                    "requester", "status", "created_time"
+                ],
+                "get_total_count": true
+            }
+        }`);
 
 		const fullUrl = `${url}?input_data=${queryParams}&SUBREQUEST=XMLHTTP&_=1706083864691`;
 
@@ -52,9 +52,8 @@ const fetchData = async () => {
 					"sec-fetch-site": "same-origin",
 					"x-requested-with": "XMLHttpRequest",
 					cookie:
-						"_ga=GA1.1.739500913.1706082526; _ga_T9ZME3XCCM=GS1.1.1706763419.5.0.1706763419.60.0.0; _ga_FZR0YZY0W6=GS1.1.1706763419.5.0.1706763419.0.0.0; SDPSESSIONID=0527EA8877C170A80EA7B80D3934ECF2; JSESSIONIDSSO=C9F277D90DD0546A7F725EC80A8DEF43; PORTALID=1; sdpcsrfcookie=fa29054907f96daef4d4ab6bb93372fbdb229865d3af3f0df792d4e084d7e1960bcf0f62b6a11697702ed53d99ab581bc2c846a606d1f9ee004fbc339381323b; _zcsr_tmp=fa29054907f96daef4d4ab6bb93372fbdb229865d3af3f0df792d4e084d7e1960bcf0f62b6a11697702ed53d99ab581bc2c846a606d1f9ee004fbc339381323b",
-					Referer:
-						"https://it-helpdesk.itb.ac.id/WOListView.do?viewID=30&globalViewName=Service_Requests",
+						"_ga=GA1.1.739500913.1706082526; _ga_T9ZME3XCCM=GS1.1.1706763419.5.0.1706763419.60.0.0; _ga_FZR0YZY0W6=GS1.1.1706763419.5.0.1706763419.0.0.0; SDPSESSIONID=6B7AB47D7AAAAC6C9F00DF2CC7B2EC64; JSESSIONIDSSO=8859355507E27BE292A3ACA121EEE8B0; PORTALID=1; sdpcsrfcookie=f8f8d9818a8e61fe1ab15df6504e65afee00ea785c3185e489c909a5ee6c25ddffc640fc412baaef10748429a09b058ad7fe53883423aa4eef13ea1d83f4e4d3; _zcsr_tmp=f8f8d9818a8e61fe1ab15df6504e65afee00ea785c3185e489c909a5ee6c25ddffc640fc412baaef10748429a09b058ad7fe53883423aa4eef13ea1d83f4e4d3",
+					Referer: "https://it-helpdesk.itb.ac.id/WOListView.do",
 					"Referrer-Policy": "strict-origin-when-cross-origin",
 				},
 			});
