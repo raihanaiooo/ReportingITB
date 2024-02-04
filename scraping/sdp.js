@@ -1,5 +1,5 @@
 import axios from "axios";
-import insertIntoDb from "../config.js";
+import { insertSDP } from "../db/insert.js";
 
 const url = "https://it-helpdesk.itb.ac.id/api/v3/requests";
 const MAX_RETRY = 3;
@@ -93,7 +93,7 @@ const fetchData = async () => {
 			);
 
 			// Filter out undefined values and insert all created_times into the database
-			await insertIntoDb({
+			await insertSDP({
 				requests: createdTimes
 					.filter((createdTime) => createdTime !== undefined)
 					.map((createdTime) => ({ createdTime })),
@@ -109,7 +109,7 @@ const fetchData = async () => {
 							if (allowedStatuses.includes(statusName)) {
 								const createdTimeDisplayValue =
 									request.created_time?.display_value;
-								await insertIntoDb({
+								await insertSDP({
 									requests: [
 										{
 											id: request.id,
