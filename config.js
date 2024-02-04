@@ -25,29 +25,63 @@ const insertIntoDb = async (data) => {
 		// Begin a transaction
 		await connection.beginTransaction();
 
-		// Iterate over requests and insert into the 'ticketing' table
-		for (const { id, status } of data.requests) {
-			// Fetch the corresponding status_id from the 'status' table based on the 'status' name
-			const statusResult = await queryAsync(
-				"SELECT id FROM status WHERE name = ?",
-				[status]
-			);
+		// Inside the for loop
+		// Inside the for loop
+		for (const requestData of data.requests) {
+			const { id, status, createdTimeDisplayValue } = requestData;
 
-			if (statusResult[0].length === 0) {
-				console.log(`Status '${status}' not found in the database.`);
-				continue;
+			try {
+				if (id === undefined || status === undefined) {
+					console.error(
+						"Invalid data. ID or status is undefined.",
+						requestData
+					);
+					continue;
+				}
+
+				console.log("Attempting to insert data:", {
+					id,
+					status,
+					createdTimeDisplayValue,
+				});
+
+				// Fetch the corresponding status_id from the 'status' table based on the 'status' name
+				const statusResult = await queryAsync(
+					"SELECT id FROM status WHERE name = ?",
+					[status]
+				);
+
+				if (statusResult[0].length === 0) {
+					console.log(`Status '${status}' not found in the database.`);
+					continue;
+				}
+
+				const statusId = statusResult[0][0].id;
+
+				// Insert into the 'ticketing' table with the corresponding status_id
+				const sql =
+					"INSERT INTO ticketing (id_scrape, created_time, status_id) VALUES (?, ?, ?)";
+
+				// Set createdTimeDisplayValue to null if it's undefined
+				const values = [
+					id,
+					createdTimeDisplayValue !== undefined
+						? createdTimeDisplayValue
+						: null,
+					statusId,
+				];
+
+				const results = await queryAsync(sql, values);
+
+				console.log(
+					`Data with ID ${id} inserted into the database. Rows affected: ${results.affectedRows}`
+				);
+			} catch (error) {
+				console.error(`Error inserting data with ID ${id}:`, error.message);
+				console.error("SQL Error Code:", error.code);
+				console.error("SQL Error Number:", error.errno);
+				console.error("SQL Error SQL State:", error.sqlState);
 			}
-
-			const statusId = statusResult[0][0].id;
-
-			// Insert into the 'ticketing' table with the corresponding status_id
-			const sql = "INSERT INTO ticketing (id_scrape, status_id) VALUES (?, ?)";
-			const values = [id, statusId];
-			const results = await queryAsync(sql, values);
-
-			console.log(
-				`Data with ID ${id} inserted into the database. Rows affected: ${results.affectedRows}`
-			);
 		}
 
 		// Commit the transaction

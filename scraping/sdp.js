@@ -87,18 +87,36 @@ const fetchData = async () => {
 
 			// Specify the statuses you want to fetch
 			const allowedStatuses = ["Open", "In Progress", "Closed", "Resolved"];
+			// Fetch created_time for all requests first
+			const createdTimes = currentPageRequests.map(
+				(request) => request.created_time?.display_value
+			);
 
+			// Filter out undefined values and insert all created_times into the database
+			await insertIntoDb({
+				requests: createdTimes
+					.filter((createdTime) => createdTime !== undefined)
+					.map((createdTime) => ({ createdTime })),
+			});
 			await Promise.all(
 				currentPageRequests.map(async (request) => {
 					try {
-						// Check if 'status' is defined and has the 'name' property
-						if (request.status && request.status.name) {
+						// Check if 'status' and 'id' are defined
+						if (request.status && request.status.name && request.id) {
 							const statusName = request.status.name;
 
 							// Check if the status is one of the allowed statuses
 							if (allowedStatuses.includes(statusName)) {
+								const createdTimeDisplayValue =
+									request.created_time?.display_value;
 								await insertIntoDb({
-									requests: [{ id: request.id, status: statusName }],
+									requests: [
+										{
+											id: request.id,
+											status: statusName,
+											createdTimeDisplayValue: createdTimeDisplayValue || null,
+										},
+									],
 								});
 
 								console.log(
