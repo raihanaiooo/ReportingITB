@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\DB;
 
 class Ticketing extends Model
 {
@@ -11,15 +12,20 @@ class Ticketing extends Model
     protected $table = 'ticketing';
 
     protected $fillable = [
-       'id_scrape', 'createdDate', 'dueDate', 'status_id'
+       'id_scrape', 'createdDate', 'dueDate', 'status_id','created_at', 'updated_at'
     ];
-    // public function setStatusAttribute($value)
-    // {
-    //     $this->attributes['status'] = (int) $value;
-    // }
+
+
     public function status()
     {
         return $this->belongsTo(Status::class, 'status_id'); // 'status_id' should match your actual foreign key in the 'ticketing' table.
+    }
+
+    public static function getStatusData()
+    {
+        return self::select('status_id', DB::raw('COUNT(*) AS total'))
+            ->groupBy('status_id')
+            ->get();
     }
 
 }
