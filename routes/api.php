@@ -30,4 +30,6 @@ Route::group([
     
 });
 Route::get('/bar', [TicketingController::class, 'Bar']);
+// Contoh Route
+Route::get('/get-data/{months}', [TicketingController::class, 'getDate']);
 Route::get('doughnut', [TicketingController::class, 'Doughnut']);
