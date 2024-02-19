@@ -18,5 +18,5 @@ use Illuminate\Support\Facades\Route;
 //     return view('welcome');
 // });
 Route::get('/api/bar', [TicketingController::class, 'Bar']);
-
+Route::get('/get-data/{months}', [TicketingController::class, 'getDate']);
 
