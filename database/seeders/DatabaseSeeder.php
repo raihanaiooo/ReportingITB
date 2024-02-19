@@ -6,6 +6,7 @@ use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB; // Add this line
 use App\Models\User;
 
+
 class DatabaseSeeder extends Seeder
 {
     /**
@@ -24,8 +25,13 @@ class DatabaseSeeder extends Seeder
             return ['name' => $status];
         }, $statuses);
 
-        DB::table('status')->insert($statusData); // Correct the table name to 'statuses'
+        DB::table('status')->insert($statusData);
 
-        // Additional seeding logic if needed
+        $apps = ['zoom', 'ms365', 'adobe', 'mathlab', 'minitab'];
+        $appData = array_map(function ($app) {
+            return ['name' => $app];
+        }, $apps);
+
+        DB::table('app')->insert($appData);
     }
 }

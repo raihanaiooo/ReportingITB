@@ -3,6 +3,7 @@
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Database\Eloquent\Timestamps;
 
 return new class extends Migration
 {
@@ -14,8 +15,7 @@ return new class extends Migration
         Schema::create('ticketing', function (Blueprint $table) {
             $table->id();
             $table->integer('id_scrape');
-            $table->date('createdDate')->nullable();
-            $table->date('dueDate')->nullable();
+            $table->string('created_time')->nullable();
             $table->unsignedBigInteger('status_id')->nullable();
             $table->foreign('status_id')->references('id')->on('status')->onDelete('set null');
             $table->timestamps();
