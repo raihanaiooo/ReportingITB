@@ -27,4 +27,4 @@ Route::group([
 Route::get('/bar', [TicketingController::class, 'Bar']);
 // Contoh Route
 
-Route::get('doughnut', [TicketingController::class, 'Doughnut']);
+Route::get('/doughnut', [TicketingController::class, 'Doughnut']);
