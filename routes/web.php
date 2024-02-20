@@ -18,5 +18,6 @@ use Illuminate\Support\Facades\Route;
 //     return view('welcome');
 // });
 Route::get('/api/bar', [TicketingController::class, 'Bar']);
+Route::get('/api/doughnut', [TicketingController::class, 'Doughnut']);
 
 
