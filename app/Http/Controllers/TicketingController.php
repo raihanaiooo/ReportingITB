@@ -122,26 +122,41 @@ class TicketingController extends Controller
         ];
     
         $datas = Ticketing::all();
-        $dataByDay = [];
+        $dataByWeek = [];
         $months = [
             'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
             'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
         ];
     
-        // Initialize dataByDay for all days in the year
-        foreach (range(1, 365) as $day) {
-            $dataByDay[$day] = [
-                'label' => $day,
-                'datasets' => [],
-            ];
-            foreach ($allStatuses as $statusKey => $statusName) {
-                $dataByDay[$day]['datasets'][$statusKey] = [
-                    'label' => $statusName,
-                    'backgroundColor' => "rgb(0, 224, 255)",
-                    'borderColor' => "rgb(0, 224, 255)",
-                    'borderWidth' => 1,
-                    'data' => 0,
+        // Initialize dataByWeek for each week
+        foreach ($months as $month) {
+            $firstDay = new DateTime("first Monday of $month " . date('Y'));
+            $lastDay = new DateTime("last Friday of $month " . date('Y'));
+    
+            $currentDay = clone $firstDay;
+            $weekNumber = 1;
+    
+            while ($currentDay <= $lastDay) {
+                $dataByWeek[$month][$weekNumber] = [
+                    'label' => $currentDay->format('M d'),
+                    'datasets' => [],
                 ];
+    
+                foreach ($allStatuses as $statusKey => $statusName) {
+                    $dataByWeek[$month][$weekNumber]['datasets'][$statusKey] = [
+                        'label' => $statusName,
+                        'backgroundColor' => "rgb(0, 224, 255)",
+                        'borderColor' => "rgb(0, 224, 255)",
+                        'borderWidth' => 1,
+                        'data' => 0,
+                    ];
+                }
+    
+                $currentDay->modify('+1 day');
+    
+                if ($currentDay->format('N') === '5') { // Check if it's Friday
+                    $weekNumber++;
+                }
             }
         }
     
@@ -152,12 +167,14 @@ class TicketingController extends Controller
             $dateTime = DateTime::createFromFormat('M d, Y h:i A', $item->created_time);
     
             if ($dateTime) {
-                $day = $dateTime->format('z') + 1; // z returns the day of the year (0 through 365)
+                $month = $dateTime->format('M');
+                $weekNumber = ceil($dateTime->format('j') / 7); // Calculate the week number
+                $dayOfWeek = $dateTime->format('N'); // Get the day of the week
     
-                // Check if the day is not Saturday (6) or Sunday (0)
-                if ($dateTime->format('N') >= 1 && $dateTime->format('N') <= 5) {
+                // Check if the day is a weekday (Monday to Friday) and if it's within the specified weeks
+                if ($dayOfWeek >= 1 && $dayOfWeek <= 5 && isset($dataByWeek[$month][$weekNumber])) {
                     // Accumulate the total for the specific day and status
-                    $dataByDay[$day]['datasets'][$statusKey]['data'] += 1;
+                    $dataByWeek[$month][$weekNumber]['datasets'][$statusKey]['data'] += 1;
                 }
             } else {
                 error_log("Failed to parse date: " . $item->created_time);
@@ -167,16 +184,20 @@ class TicketingController extends Controller
         // Initialize the result array
         $result = [];
     
-        foreach ($allStatuses as $statusKey => $statusName) {
-            $statusData = [
-                'name' => $statusName,
-                'color' => $this->getStatusColor($statusKey),
-                'data' => array_map(function ($dayData) use ($statusKey) {
-                    return $dayData['datasets'][$statusKey]['data'];
-                }, $dataByDay),
-            ];
+        foreach ($dataByWeek as $month => $weeks) {
+            foreach ($weeks as $weekData) {
+                foreach ($allStatuses as $statusKey => $statusName) {
+                    $statusData = [
+                        'name' => $statusName,
+                        'color' => $this->getStatusColor($statusKey),
+                        'data' => array_map(function ($weekData) use ($statusKey) {
+                            return $weekData['datasets'][$statusKey]['data'];
+                        }, $dataByWeek[$month]),
+                    ];
     
-            $result[] = $statusData;
+                    $result[] = $statusData;
+                }
+            }
         }
     
         return response()->json($result);
@@ -194,14 +215,7 @@ class TicketingController extends Controller
         return $colors[$statusKey] ?? '#000000'; // Default to black if color is not defined
     }
     
+        
     
     
-
-    
-      
-    
-
-
-    
-
 }    
