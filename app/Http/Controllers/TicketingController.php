@@ -110,74 +110,76 @@ class TicketingController extends Controller
     
         return response()->json($result);
     }
-    
+
+
     public function Doughnut()
     {
-        $allStatuses = [
-            1 => 'Open',
-            2 => 'Closed',
-            3 => 'Resolved',
-            4 => 'In Progress',
-        ];
+        try {
+            $allStatuses = [
+                1 => 'Open',
+                2 => 'Closed',
+                3 => 'Resolved',
+                4 => 'In Progress',
+            ];
     
-        $datas = Ticketing::all();
-        $dataByMonth = [];
-        $months = [
-            'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-            'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
-        ];
+            $datas = Ticketing::all();
+            $dataByStatus = [];
     
-        foreach ($months as $month) {
-            $dataByMonth[$month] = [
-                'label' => $month,
-                'datasets' => [],
+            // Initialize $dataByMonth based on your month structure
+            $dataByMonth = [
+                'Jan' => ['datasets' => []],
+                'Feb' => ['datasets' => []],
+                'Mar' => ['datasets' => []],
+                'Apr' => ['datasets' => []],
+                'May' => ['datasets' => []],
+                'Jun' => ['datasets' => []],
+                'Jul' => ['datasets' => []],
+                'Aug' => ['datasets' => []],
+                'Sep' => ['datasets' => []],
+                'Oct' => ['datasets' => []],
+                'Nov' => ['datasets' => []],
+                'Dec' => ['datasets' => []],
             ];
     
             foreach ($allStatuses as $statusKey => $statusName) {
-                $dataByMonth[$month]['datasets'][$statusKey] = [
-                    'label' => $statusName,
-                    'backgroundColor' => "rgb(0, 224, 255)",
-                    'borderColor' => "rgb(0, 224, 255)",
-                    'borderWidth' => 1,
-                    'data' => [], // Modify this line
-                ];
+                foreach ($dataByMonth as $month => $monthData) {
+                    $dataByStatus[$month]['datasets'][$statusKey]['data'] = [];
+                }
             }
-        }
     
-        foreach ($datas as $item) {
-            $statusKey = $item->status_id;
-            $statusName = $allStatuses[$statusKey];
+            foreach ($datas as $item) {
+                $statusKey = $item->status_id;
+                $dateTime = DateTime::createFromFormat('M d, Y h:i A', $item->created_time);
     
-            $dateTime = DateTime::createFromFormat('M d, Y h:i A', $item->created_time);
+                if ($dateTime) {
+                    $month = $dateTime->format('M');
+                    $dayOfMonth = $dateTime->format('j');
     
-            if ($dateTime) {
-                $month = $dateTime->format('M');
-                $day = $dateTime->format('d');
+                    // Ensure the necessary keys exist before accessing them
+                    if (!isset($dataByMonth[$month]['datasets'][$statusKey]['data'][$dayOfMonth])) {
+                        $dataByMonth[$month]['datasets'][$statusKey]['data'][$dayOfMonth] = 0;
+                    }
     
-                // Ensure that the array key exists before incrementing
-                $dataByMonth[$month]['datasets'][$statusKey]['data'][$day] = isset($dataByMonth[$month]['datasets'][$statusKey]['data'][$day]) ?
-                    $dataByMonth[$month]['datasets'][$statusKey]['data'][$day] + 1 :
-                    1;
-            } else {
-                error_log("Failed to parse date: " . $item->created_time);
+                    // Accumulate the total for the specific day and status
+                    $dataByMonth[$month]['datasets'][$statusKey]['data'][$dayOfMonth]++;
+                } else {
+                    error_log("Failed to parse date: " . $item->created_time);
+                }
             }
+            
+            // Log the fetched data
+            \Log::info('Fetched Data: ' . json_encode($dataByMonth));
+    
+            return response()->json(['dataByMonth' => $dataByMonth]);
+        } catch (\Exception $e) {
+            \Log::error('Error in Doughnut endpoint: ' . $e->getMessage());
+            return response()->json(['error' => 'Internal Server Error'], 500);
         }
-    
-        // Initialize the result array
-        $result = [];
-    
-        foreach ($allStatuses as $statusKey => $statusName) {
-            $result[] = [
-                'name' => $statusName,
-                'color' => $this->getStatusColor($statusKey),
-                'data' => array_map(function ($monthData) use ($statusKey) {
-                    return array_sum($monthData['datasets'][$statusKey]['data']);
-                }, $dataByMonth),
-            ];
-        }
-    
-        return response()->json($result);
     }
+    
+    
+        
+        
         
     
     private function getStatusColor($statusKey)
@@ -193,4 +195,84 @@ class TicketingController extends Controller
     }
     
 
+    // public function Doughnut()
+    // {
+    //     $allStatuses = [
+    //         1 => 'Open',
+    //         2 => 'Closed',
+    //         3 => 'Resolved',
+    //         4 => 'In Progress',
+    //     ];
+    
+    //     $datas = Ticketing::all();
+    //     $dataByMonth = [];
+    //     $months = [
+    //         'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+    //         'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
+    //     ];
+    
+    //     $labels = array_slice($months, 0, 12);
+    
+    //     foreach ($labels as $month) {
+    //         $dataByMonth[$month] = [
+    //             'label' => $month,
+    //             'datasets' => [],
+    //         ];
+    
+    //         foreach ($allStatuses as $statusKey => $statusName) {
+    //             $dataByMonth[$month]['datasets'][$statusKey] = [
+    //                 'label' => $statusName,
+    //                 'backgroundColor' => "rgb(0, 224, 255)",
+    //                 'borderColor' => "rgb(0, 224, 255)",
+    //                 'borderWidth' => 1,
+    //                 'data' => [],
+    //             ];
+    //         }
+    //     }
+    
+    //     foreach ($datas as $item) {
+    //         $statusKey = $item->status_id;
+    //         $statusName = $allStatuses[$statusKey];
+    
+    //         $dateTime = DateTime::createFromFormat('M d, Y h:i A', $item->created_time);
+    
+    //         if ($dateTime) {
+    //             $month = $dateTime->format('M');
+    //             $dayOfMonth = $dateTime->format('j');
+    
+    //             // Accumulate the total for the specific day and status
+    //             $dataByMonth[$month]['datasets'][$statusKey]['data'][$dayOfMonth] = ($dataByMonth[$month]['datasets'][$statusKey]['data'][$dayOfMonth] ?? 0) + 1;
+    
+    //         } else {
+    //             error_log("Failed to parse date: " . $item->created_time);
+    //         }
+    //     }
+    
+    //     // Initialize the result array
+    //     $result = [];
+    
+    //     foreach ($allStatuses as $statusKey => $statusName) {
+    //         $result[] = [
+    //             'name' => $statusName,
+    //             'color' => $this->getStatusColor($statusKey),
+    //             'data' => array_map(function ($monthData) use ($statusKey) {
+    //                 return array_sum($monthData['datasets'][$statusKey]['data']);
+    //             }, $dataByMonth),
+    //         ];
+    //     }
+    
+    //     return response()->json($result);
+    // }
+    
+    // private function getStatusColor($statusKey)
+    // {
+    //     $colors = [
+    //         1 => '#FDBA8C',
+    //         4 => '#16BDCA',
+    //         3 => '#4154F1',
+    //         2 => '#E74694',
+    //     ];
+    
+    //     return $colors[$statusKey] ?? '#000000'; // Default to black if color is not defined
+    // }
 }    
