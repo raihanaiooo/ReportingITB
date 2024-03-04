@@ -5,7 +5,7 @@ const url = "https://it-helpdesk.itb.ac.id/api/v3/requests";
 const MAX_RETRY = 3;
 const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
-const fetchData = async () => {
+const fetchDataSDP = async () => {
 	const allRequestIds = new Set(); // Menyimpan ID setiap request yang sudah diambil
 
 	const fetchPage = async (page, retry = 0) => {
@@ -52,7 +52,7 @@ const fetchData = async () => {
 					"sec-fetch-site": "same-origin",
 					"x-requested-with": "XMLHttpRequest",
 					cookie:
-						"_ga=GA1.1.739500913.1706082526; _ga_T9ZME3XCCM=GS1.1.1706763419.5.0.1706763419.60.0.0; _ga_FZR0YZY0W6=GS1.1.1706763419.5.0.1706763419.0.0.0; SDPSESSIONID=6B7AB47D7AAAAC6C9F00DF2CC7B2EC64; JSESSIONIDSSO=8859355507E27BE292A3ACA121EEE8B0; PORTALID=1; sdpcsrfcookie=f8f8d9818a8e61fe1ab15df6504e65afee00ea785c3185e489c909a5ee6c25ddffc640fc412baaef10748429a09b058ad7fe53883423aa4eef13ea1d83f4e4d3; _zcsr_tmp=f8f8d9818a8e61fe1ab15df6504e65afee00ea785c3185e489c909a5ee6c25ddffc640fc412baaef10748429a09b058ad7fe53883423aa4eef13ea1d83f4e4d3",
+						"_ga=GA1.1.739500913.1706082526; _ga_T9ZME3XCCM=GS1.1.1706763419.5.0.1706763419.60.0.0; _ga_FZR0YZY0W6=GS1.1.1706763419.5.0.1706763419.0.0.0; SDPSESSIONID=4AFE6E9C9B1F00BF5717A545F5EAE570; JSESSIONIDSSO=D5340A9CAA367753E98767473F9E092A; PORTALID=1; sdpcsrfcookie=db079a9b22c2c3241b3122594457e0c321ce6440f6cca6f4ebda44f2b4b6fa7c2c4a68557e22d27fa530c51ca146e3adabebb2f64e970a17f4a26ac168bd686e; _zcsr_tmp=db079a9b22c2c3241b3122594457e0c321ce6440f6cca6f4ebda44f2b4b6fa7c2c4a68557e22d27fa530c51ca146e3adabebb2f64e970a17f4a26ac168bd686e",
 					Referer: "https://it-helpdesk.itb.ac.id/WOListView.do",
 					"Referrer-Policy": "strict-origin-when-cross-origin",
 				},
@@ -184,7 +184,7 @@ const fetchData = async () => {
 		}
 	}
 
-	return fetchData;
+	return fetchDataSDP;
 };
 
-export default fetchData;
+export default fetchDataSDP;

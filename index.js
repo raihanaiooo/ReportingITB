@@ -1,3 +1,5 @@
-import fetchData from "./scraping/sdp.js";
+import fetchDataSDP from "./scraping/sdp.js";
+import fetchDataMinitab from "./scraping/minitab.js";
 
-fetchData();
+// fetchDataSDP();
+fetchDataMinitab();
