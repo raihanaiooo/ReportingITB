@@ -55,7 +55,9 @@ const fetchDataMinitab = async () => {
 			throw new Error("Invalid data format or missing Total property");
 		}
 
-		await insertMinitab({ Total: totalUsers });
+		await insertMinitab(db, { Total: totalUsers });
+
+		console.log("Data berhasil dimasukkan ke dalam database.");
 	} catch (error) {
 		console.error("Error:", error.message);
 		if (error.response && error.response.data) {

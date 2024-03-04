@@ -97,70 +97,38 @@ const insertSDP = async (data) => {
 	}
 };
 
-const insertMinitab = async (data) => {
-	const pool = createDbPool();
-	let connection;
+const insertMinitab = async (db, data) => {
+	const appTypeId = 5; // Set the desired app_type_id
 
 	try {
 		if (!data || !data.Total) {
 			throw new Error("Invalid data format or missing Total property");
 		}
 
-		connection = await pool.getConnection();
-		const queryAsync = connection.execute.bind(connection);
+		const { Total } = data;
 
-		await connection.beginTransaction();
+		console.log("Attempting to insert data:", {
+			Total,
+			appTypeId,
+		});
 
-		try {
-			const { Total } = data;
-			const appTypeId = 5; // Set the desired app_type_id
+		// Update the SQL query to set the 'total', 'used', and 'available' columns
+		const sql =
+			"INSERT INTO licenses (total, app_type_id, used, available) VALUES (?, ?, ?, ?)";
+		const values = [10060, appTypeId, Total, 10060 - Total]; // Set 'total' as 10060
 
-			console.log("Attempting to insert data:", {
-				Total,
-				appTypeId,
-			});
+		const results = await db.execute(sql, values);
 
-			// Insert into the 'licenses' table
-			const sql =
-				"INSERT INTO licenses (total, app_type_id, used) VALUES (?, ?, 0)";
-
-			const values = [Total, appTypeId];
-
-			const results = await queryAsync(sql, values);
-
-			console.log(
-				`Data with Total ${Total} inserted into the database. Rows affected: ${results.affectedRows}`
-			);
-		} catch (error) {
-			console.error("Error inserting data:", error.message);
-			console.error("SQL Error Code:", error.code);
-			console.error("SQL Error Number:", error.errno);
-			console.error("SQL Error SQL State:", error.sqlState);
-		}
-
-		// Commit the transaction
-		await connection.commit();
-
-		console.log("Data inserted into the database successfully.");
+		console.log(
+			`Data with Total ${Total} inserted into the database. Rows affected: ${results.affectedRows}`
+		);
 	} catch (error) {
-		console.error("Error inserting data into the database:", error.message);
+		console.error("Error inserting data:", error.message);
 		console.error("SQL Error Code:", error.code);
 		console.error("SQL Error Number:", error.errno);
 		console.error("SQL Error SQL State:", error.sqlState);
 
-		if (connection) {
-			await connection.rollback();
-		}
-
 		throw error;
-	} finally {
-		if (connection) {
-			try {
-				await connection.release();
-			} catch (releaseError) {
-				console.error("Error releasing connection:", releaseError.message);
-			}
-		}
 	}
 };
 
