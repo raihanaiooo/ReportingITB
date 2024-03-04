@@ -2,6 +2,8 @@
 
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\TicketingController;
+use App\Http\Controllers\CRUDController;
+use App\Http\Controllers\LicensesController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -33,6 +35,9 @@ Route::group([
 Route::prefix('api/licenses')->group(function () {
     Route::put('/', [CRUDController::class, 'updateApi'])->name('api.licenses.update');
 });
+
+
+Route::get('/minitab', [LicensesController::class, 'Minitab']);
 Route::get('/bar', [TicketingController::class, 'Bar']);
 
 

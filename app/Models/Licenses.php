@@ -11,7 +11,7 @@ class Licenses extends Model
     protected $table = 'licenses';
 
     protected $fillable = [
-       'total', 'app_type_id','created_at', 'updated_at'
+       'total','used','available','app_type_id','created_at', 'updated_at'
     ];
     public function app()
     {
