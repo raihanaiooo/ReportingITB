@@ -25,14 +25,8 @@ Route::group([
     Route::post('me', [AuthController::class, 'me']);
 });
 
-Route::group(['prefix' => 'licenses'], function () {
-    Route::get('/', [CRUDController::class, 'index'])->name('licenses.index');
-    Route::get('/create', [CRUDController::class, 'create'])->name('licenses.create');
-    Route::post('/', [CRUDController::class, 'store'])->name('licenses.store');
-    Route::get('/{id}', [CRUDController::class, 'show'])->name('licenses.show');
-    Route::get('/{id}/edit', [CRUDController::class, 'edit'])->name('licenses.edit');
-    Route::put('/{id}', [CRUDController::class, 'update'])->name('licenses.update');
-    Route::delete('/{id}', [CRUDController::class, 'destroy'])->name('licenses.destroy');
+Route::prefix('api/licenses')->group(function () {
+    Route::put('/', [CRUDController::class, 'updateApi'])->name('api.licenses.update');
 });
 Route::get('/bar', [TicketingController::class, 'Bar']);
 

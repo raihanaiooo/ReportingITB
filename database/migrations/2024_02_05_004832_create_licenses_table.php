@@ -13,9 +13,9 @@ return new class extends Migration
     {
         Schema::create('licenses', function (Blueprint $table) {
             $table->id();
-            $table->integer("total");
-            $table->integer("used");
-            $table->integer("available");
+            $table->integer("total")->nullable();
+            $table->integer("used")->nullable();
+            $table->integer("available")->nullable();
             $table->unsignedBigInteger('app_type_id')->nullable();
             $table->foreign('app_type_id')->references('id')->on('app')->onDelete('set null');
             $table->timestamps();
