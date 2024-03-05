@@ -36,11 +36,17 @@ Route::group([
 //     Route::put('/', [CRUDController::class, 'updateApi'])->name('api.licenses.update');
 // });
 
-Route::put('/licenses', [CRUDController::class, 'updateApi']);
+Route::group([
+
+    'middleware' => 'api',
+    'prefix' => 'api'
+
+], function ($router) {
+    Route::get('minitab-bar', [LicensesController::class, 'MinitabBar']);
+    Route::get('bar', [TicketingController::class, 'Bar']);
+    Route::get('doughnut', [TicketingController::class, 'Doughnut']);    
+});
 
 
-Route::get('/minitab', [LicensesController::class, 'Minitab']);
-Route::get('/bar', [TicketingController::class, 'Bar']);
-
-
-Route::get('/doughnut', [TicketingController::class, 'Doughnut']);
+// Route::put('/licenses', [CRUDController::class, 'updateApi']);
+// Route::get('/minitab', [LicensesController::class, 'Minitab']);
