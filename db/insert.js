@@ -107,23 +107,29 @@ const insertMinitab = async (db, data) => {
 
 		const { Total } = data;
 
-		console.log("Attempting to insert data:", {
+		console.log("Attempting to insert or update data:", {
 			Total,
 			appTypeId,
 		});
 
-		// Update the SQL query to set the 'total', 'used', and 'available' columns
+		// Define currentTimestamp
+		const currentTimestamp = new Date()
+			.toISOString()
+			.slice(0, 19)
+			.replace("T", " "); // Get current timestamp in 'YYYY-MM-DD HH:mm:ss' format
+
+		// Use a single SQL statement with ON DUPLICATE KEY UPDATE
 		const sql =
-			"INSERT INTO licenses (total, app_type_id, used, available) VALUES (?, ?, ?, ?)";
-		const values = [10060, appTypeId, Total, 10060 - Total]; // Set 'total' as 10060
+			"INSERT INTO licenses (app_type_id, total, used, available, inserted_at) VALUES (?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE used = VALUES(used), available = VALUES(available), inserted_at = VALUES(inserted_at)";
+		const values = [appTypeId, 10060, Total, 10060 - Total, currentTimestamp];
 
 		const results = await db.execute(sql, values);
 
 		console.log(
-			`Data with Total ${Total} inserted into the database. Rows affected: ${results.affectedRows}`
+			`Data with Total ${Total} inserted or updated in the database. Rows affected: ${results.affectedRows}`
 		);
 	} catch (error) {
-		console.error("Error inserting data:", error.message);
+		console.error("Error inserting or updating data:", error.message);
 		console.error("SQL Error Code:", error.code);
 		console.error("SQL Error Number:", error.errno);
 		console.error("SQL Error SQL State:", error.sqlState);
