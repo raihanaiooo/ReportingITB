@@ -27,9 +27,11 @@ Route::group([
     Route::post('me', [AuthController::class, 'me']);
 });
 
-Route::prefix('api/licenses')->group(function () {
-    Route::put('/', [CRUDController::class, 'updateApi'])->name('api.licenses.update');
-});
+// Route::prefix('api/licenses')->group(function () {
+//     Route::put('/', [CRUDController::class, 'updateApi'])->name('api.licenses.update');
+// });
+
+Route::put('/licenses', [CRUDController::class, 'updateApi']);
 
 
 Route::get('/minitab', [LicensesController::class, 'Minitab']);
