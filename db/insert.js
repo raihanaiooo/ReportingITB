@@ -107,7 +107,7 @@ const insertMinitab = async (db, data) => {
 
 		const { Total } = data;
 
-		console.log("Attempting to insert or update data:", {
+		console.log("Attempting to insert data:", {
 			Total,
 			appTypeId,
 		});
@@ -118,18 +118,42 @@ const insertMinitab = async (db, data) => {
 			.slice(0, 19)
 			.replace("T", " "); // Get current timestamp in 'YYYY-MM-DD HH:mm:ss' format
 
-		// Use a single SQL statement with ON DUPLICATE KEY UPDATE
-		const sql =
-			"INSERT INTO licenses (app_type_id, total, used, available, inserted_at) VALUES (?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE used = VALUES(used), available = VALUES(available), inserted_at = VALUES(inserted_at)";
-		const values = [appTypeId, 10060, Total, 10060 - Total, currentTimestamp];
-
-		const results = await db.execute(sql, values);
-
-		console.log(
-			`Data with Total ${Total} inserted or updated in the database. Rows affected: ${results.affectedRows}`
+		const existingRecord = await db.query(
+			"SELECT * FROM licenses WHERE app_type_id = ?",
+			[appTypeId]
 		);
+
+		if (existingRecord.length > 0) {
+			// If the record exists, update the 'used', 'available', and 'inserted_at' columns
+			const updateSql =
+				"UPDATE licenses SET used = ?, available = ?, inserted_at = ? WHERE app_type_id = ?";
+			const updateValues = [Total, 10060 - Total, currentTimestamp, appTypeId];
+
+			const updateResults = await db.execute(updateSql, updateValues);
+
+			console.log(
+				`Data with Total ${Total} updated in the database. Rows affected: ${updateResults.affectedRows}`
+			);
+		} else {
+			// If the record does not exist, insert a new record with the 'inserted_at' timestamp
+			const insertSql =
+				"INSERT INTO licenses (total, app_type_id, used, available, inserted_at) VALUES (?, ?, ?, ?, ?)";
+			const insertValues = [
+				10060,
+				appTypeId,
+				Total,
+				10060 - Total,
+				currentTimestamp,
+			];
+
+			const insertResults = await db.execute(insertSql, insertValues);
+
+			console.log(
+				`Data with Total ${Total} inserted into the database. Rows affected: ${insertResults.affectedRows}`
+			);
+		}
 	} catch (error) {
-		console.error("Error inserting or updating data:", error.message);
+		console.error("Error inserting data:", error.message);
 		console.error("SQL Error Code:", error.code);
 		console.error("SQL Error Number:", error.errno);
 		console.error("SQL Error SQL State:", error.sqlState);
