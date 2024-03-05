@@ -1,13 +1,17 @@
 import axios from "axios";
 import { insertMinitab } from "../db/insert.js";
 import createDbPool from "../config.js";
+
 const pool = createDbPool();
+
 const apiUrl =
 	"https://licensing.minitab.com/api/v1/subscriptions/8b127d5f3f48492cbed3ac291a9e2533/products/e68147de1c46451bafadcfcc44e196cc/users?q=matchall&take=25&startToken=";
+
 const fetchDataMinitab = async () => {
 	let db;
 	try {
 		db = await pool.getConnection();
+
 		const requestBody = {
 			list_info: {
 				get_total_count: true,
@@ -42,8 +46,11 @@ const fetchDataMinitab = async () => {
 				"Referrer-Policy": "strict-origin-when-cross-origin",
 			},
 		});
+
 		console.log("API Response:", response.data); // Log the entire response
+
 		const totalUsers = response.data.Total;
+
 		if (typeof totalUsers !== "number") {
 			throw new Error("Invalid data format or missing Total property");
 		}
@@ -62,4 +69,5 @@ const fetchDataMinitab = async () => {
 		}
 	}
 };
+
 export default fetchDataMinitab;

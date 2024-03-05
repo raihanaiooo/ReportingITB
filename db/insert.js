@@ -107,39 +107,23 @@ const insertMinitab = async (db, data) => {
 
 		const { Total } = data;
 
-		console.log("Attempting to insert or update data:", {
+		console.log("Attempting to insert data:", {
 			Total,
 			appTypeId,
 		});
 
-		// Check if a record with the given Total exists
-		const checkQuery = "SELECT * FROM licenses WHERE total = ?";
-		const [checkResults] = await db.query(checkQuery, [Total]);
+		// Update the SQL query to set the 'total', 'used', and 'available' columns
+		const sql =
+			"INSERT INTO licenses (total, app_type_id, used, available) VALUES (?, ?, ?, ?)";
+		const values = [10060, appTypeId, Total, 10060 - Total]; // Set 'total' as 10060
 
-		if (checkResults && checkResults.length > 0) {
-			// Record with the given Total exists, update the 'used' column
-			const updateQuery = "UPDATE licenses SET used = ? WHERE total = ?";
-			const [updateResults] = await db.execute(updateQuery, [Total, Total]);
+		const results = await db.execute(sql, values);
 
-			console.log(
-				`Data with Total ${Total} updated. Rows affected: ${updateResults.affectedRows}`
-			);
-		} else {
-			// Record with the given Total doesn't exist, insert a new record
-			const insertQuery =
-				"INSERT INTO licenses (total, app_type_id, used, available, inserted_at) VALUES (?, ?, 0, ?, CURRENT_TIMESTAMP)";
-			const [insertResults] = await db.execute(insertQuery, [
-				Total,
-				appTypeId,
-				10060 - Total,
-			]);
-
-			console.log(
-				`Data with Total ${Total} inserted into the database. Rows affected: ${insertResults.affectedRows}`
-			);
-		}
+		console.log(
+			`Data with Total ${Total} inserted into the database. Rows affected: ${results.affectedRows}`
+		);
 	} catch (error) {
-		console.error("Error inserting or updating data:", error.message);
+		console.error("Error inserting data:", error.message);
 		console.error("SQL Error Code:", error.code);
 		console.error("SQL Error Number:", error.errno);
 		console.error("SQL Error SQL State:", error.sqlState);
