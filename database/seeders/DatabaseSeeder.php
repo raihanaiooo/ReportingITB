@@ -33,5 +33,14 @@ class DatabaseSeeder extends Seeder
         }, $apps);
 
         DB::table('app')->insert($appData);
+
+        DB::table('licenses')->insert([
+            [
+                'total' => 1151,
+                'used' => 824,
+                'available' => 1151-824,
+                'app_type_id' => 3
+            ],
+        ]);
     }
 }
