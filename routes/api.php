@@ -42,6 +42,6 @@ Route::group([
     Route::get('doughnut', [TicketingController::class, 'Doughnut']);    
 });
 
-
 // Route::put('/licenses', [CRUDController::class, 'updateApi']);
-// Route::get('/minitab', [LicensesController::class, 'Minitab']);
+Route::get('/minitab', [LicensesController::class, 'Minitab']);
+Route::put('/adobe', [CRUDController::class, 'updateApi'])->name('api.licenses.update');

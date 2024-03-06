@@ -31,6 +31,11 @@ class AuthController extends Controller
 
         return $this->respondWithToken($token);
     }
+    public function checkLoginStatus()
+{
+    return response()->json(['isLoggedIn' => Auth::check()]);
+}
+
 
     /**
      * Get the authenticated User.
