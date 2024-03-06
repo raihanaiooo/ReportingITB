@@ -19,36 +19,26 @@ class LicensesController extends Controller
     }
 
     public function MinitabBar(Request $request)
-{
-    $licenseData = Licenses::all();
-
-    $result = [];
-
-    $months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-
-    foreach ($months as $month) {
-        $monthlyData = [
-            'x' => $month,
-            'y_used' => 0,
-        ];
-
-        // Loop melalui data dari tabel licenses
-        foreach ($licenseData as $data) {
-            // Gunakan Carbon untuk manipulasi waktu
-            $insertedAt = Carbon::parse($data->inserted_at);
-
-            // Filter data berdasarkan bulan
-            if ($insertedAt->format('M') == $month) {
-
-                $monthlyData['y_used'] += $data->used;
-            }
+    {
+        $result = [];
+    
+        $months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    
+        foreach ($months as $month) {
+            $monthlyUsed = Licenses::selectRaw('MAX(used) as used')
+                ->whereMonth('inserted_at', Carbon::parse("1 $month")->month)
+                ->groupBy('app_type_id')
+                ->pluck('used')
+                ->first() ?? 0;
+    
+            $result[] = [
+                'x' => $month,
+                'y_used' => $monthlyUsed,
+            ];
         }
-
-
-        $result[] = $monthlyData;
+    
+        return response()->json(['result' => $result]);
     }
-
-    return response()->json(['result' => $result]);
-}
+    
 
 }

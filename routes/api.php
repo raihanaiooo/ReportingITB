@@ -32,9 +32,9 @@ Route::group([
     
 });
 
-// Route::prefix('api/licenses')->group(function () {
-//     Route::put('/', [CRUDController::class, 'updateApi'])->name('api.licenses.update');
-// });
+
+Route::put('/adobe', [CRUDController::class, 'updateApi'])->name('api.licenses.update');
+
 
 Route::group([
 
@@ -43,10 +43,10 @@ Route::group([
 
 ], function ($router) {
     Route::get('minitab-bar', [LicensesController::class, 'MinitabBar']);
+    Route::get('/minitab', [LicensesController::class, 'Minitab']);
     Route::get('bar', [TicketingController::class, 'Bar']);
     Route::get('doughnut', [TicketingController::class, 'Doughnut']);    
 });
 
 
 // Route::put('/licenses', [CRUDController::class, 'updateApi']);
-// Route::get('/minitab', [LicensesController::class, 'Minitab']);
