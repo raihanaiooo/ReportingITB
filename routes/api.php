@@ -33,7 +33,7 @@ Route::group([
 });
 
 
-Route::put('/adobe', [CRUDController::class, 'updateApi'])->name('api.licenses.update');
+Route::patch('/adobe', [CRUDController::class, 'updateApi'])->name('api.licenses.update');
 
 
 Route::group([
