@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Models\App;
 use App\Models\Licenses;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Carbon;
@@ -32,6 +34,10 @@ class CRUDController extends Controller
                 'app_type_id' => $request->input('app_type_id'),
                 'inserted_at' => Carbon::now(), // Set inserted_at ke waktu saat ini
             ]);
+            
+            Log::info('License updated successfully');
+
+            return response()->json(['success' => 'License updated successfully'], 200);
 
         }catch(\Exception $e){
             Log::error($e->getMessage());
