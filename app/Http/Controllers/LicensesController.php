@@ -7,17 +7,21 @@ use Illuminate\Http\Request;
 
 class LicensesController extends Controller
 {
-    public function Minitab(){
-        $licenseData = Licenses::select('total', 'used', 'available')->first();
-
-    // Assuming you want to return this data in JSON format
-    return response()->json([
-        'total' => $licenseData->total ?? 0,
-        'used' => $licenseData->used ?? 0,
-        'available' => $licenseData->available ?? 0,
-    ]);
+    public function Minitab()
+    {
+        $licenseData = Licenses::where('app_type_id', 5)
+            ->select('total', 'used', 'available')
+            ->first();
+    
+        // Assuming you want to return this data in JSON format
+        return response()->json([
+            'total' => $licenseData->total ?? 0,
+            'used' => $licenseData->used ?? 0,
+            'available' => $licenseData->available ?? 0,
+        ]);
     }
-
+    
+    
     public function MinitabBar(Request $request)
     {
         $result = [];
@@ -39,6 +43,19 @@ class LicensesController extends Controller
     
         return response()->json(['result' => $result]);
     }
+        
+    public function Adobe()
+    {
+        $licenseData = Licenses::where('app_type_id', 3)
+            ->select('total', 'used', 'available')
+            ->first();
     
+        // Assuming you want to return this data in JSON format
+        return response()->json([
+            'total' => $licenseData->total ?? 0,
+            'used' => $licenseData->used ?? 0,
+            'available' => $licenseData->available ?? 0,
+        ]);
+    }
 
 }

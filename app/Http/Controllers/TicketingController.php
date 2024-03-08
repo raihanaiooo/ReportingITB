@@ -175,12 +175,8 @@ class TicketingController extends Controller
             \Log::error('Error in Doughnut endpoint: ' . $e->getMessage());
             return response()->json(['error' => 'Internal Server Error'], 500);
         }
+        return response()->json();
     }
-    
-    
-        
-        
-        
     
     private function getStatusColor($statusKey)
     {

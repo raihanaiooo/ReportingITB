@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Models\App;
 use App\Models\Licenses;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Carbon;
 use Illuminate\Http\Request;
 
 class CRUDController extends Controller
@@ -12,7 +14,6 @@ class CRUDController extends Controller
     {
 
         try{
-            dd($request->all());
             $request->validate([
                 'total' => 'required|integer',
                 'used' => 'required|integer',
@@ -31,13 +32,15 @@ class CRUDController extends Controller
                 'app_type_id' => $request->input('app_type_id'),
                 'inserted_at' => Carbon::now(), // Set inserted_at ke waktu saat ini
             ]);
+            
+            Log::info('License updated successfully');
+
+            return response()->json(['success' => 'License updated successfully'], 200);
 
         }catch(\Exception $e){
             Log::error($e->getMessage());
         return response()->json(['error' => 'Internal Server Error'], 500);
         }
-    
-        // return response()->json(['message' => 'License updated successfully']);
     }
 
 }
