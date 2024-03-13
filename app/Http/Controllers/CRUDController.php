@@ -27,7 +27,7 @@ class CRUDController extends Controller
                 $existingLicense->update([
                     'used' => $request->input('used'),
                     'available' => $available,
-                    'inserted_at' => Carbon::now(), // Set inserted_at to the current time
+                    'inserted_at' => Carbon::now(),
                 ]);
             } else {
                 // If no existing license, create a new instance and save it
@@ -35,7 +35,7 @@ class CRUDController extends Controller
                 $newLicense->app_type_id = 3;
                 $newLicense->used = $request->input('used');
                 $newLicense->available = $newLicense->total - $request->input('used'); // Assuming total is already in the database
-                $newLicense->inserted_at = Carbon::now(); // Set inserted_at to the current time
+                $newLicense->inserted_at = Carbon::now();
                 $newLicense->save();
             }
     
@@ -46,27 +46,6 @@ class CRUDController extends Controller
             Log::error($e->getMessage());
             return response()->json(['error' => 'Internal Server Error'], 500);
         }
-    }
-
-    public function Adobe()
-    {
-        // Return license data
-        return $this->getLicenseData();
-    }
-
-    private function getLicenseData()
-    {
-        // Retrieve license data based on app_type_id equal to 3
-        $licenseData = Licenses::where('app_type_id', 3)
-            ->select('total', 'used', 'available')
-            ->first();
-
-        // Assuming you want to return this data in JSON format
-        return response()->json([
-            'total' => $licenseData->total ?? 0,
-            'used' => $licenseData->used ?? 0,
-            'available' => $licenseData->available ?? 0,
-        ]);
     }
 
 }
