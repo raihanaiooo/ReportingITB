@@ -110,7 +110,86 @@ class TicketingController extends Controller
     
         return response()->json($result);
     }
-
-
     
+    public function Doughnut()
+    {
+        try {
+            $allStatuses = [
+                1 => 'Open',
+                2 => 'Closed',
+                3 => 'Resolved',
+                4 => 'In Progress',
+            ];
+    
+            $targetDate = 'Nov 29, 2023 09:46 AM';
+    
+            // Ubah tanggal menjadi format yang dapat diinterpretasi oleh DateTime
+            $dateTime = DateTime::createFromFormat('M d, Y h:i A', $targetDate);
+    
+            // Validasi format tanggal
+            if (!$dateTime) {
+                throw new \Exception('Invalid date format');
+            }
+    
+            $datas = Ticketing::select('*')
+            ->select(DB::raw("CONVERT_TZ(created_time, 'your_current_timezone', 'UTC') AS created_time_utc"))
+            ->having('created_time_utc', $dateTime->format('Y-m-d'))
+            ->get();
+                
+            $chartData = [
+                'labels' => array_values($allStatuses),
+                'datasets' => [
+                    [
+                        'Mon' => [
+                            'Open' => 0,
+                            'Closed' => 0,
+                            'Resolved' => 0,
+                            'In Progress' => 0,
+                        ],
+                        'Tue' => [
+                            'Open' => 0,
+                            'Closed' => 0,
+                            'Resolved' => 0,
+                            'In Progress' => 0,
+                        ],
+                        'Wed' => [
+                            'Open' => 0,
+                            'Closed' => 0,
+                            'Resolved' => 0,
+                            'In Progress' => 0,
+                        ],
+                        'Thu' => [
+                            'Open' => 0,
+                            'Closed' => 0,
+                            'Resolved' => 0,
+                            'In Progress' => 0,
+                        ],
+                        'Fri' => [
+                            'Open' => 0,
+                            'Closed' => 0,
+                            'Resolved' => 0,
+                            'In Progress' => 0,
+                        ],
+                        'backgroundColor' => ['#FFCE56', '#4CAF50', '#FF5733', '#36A2EB'],
+                    ],
+                ],
+                'day' => $dateTime->format('D'), // Format hari dari tanggal yang diberikan
+            ];
+    
+            // Loop untuk setiap data
+            foreach ($datas as $item) {
+                $statusName = $allStatuses[$item->status_id];
+                $dayOfWeek = $dateTime->format('D');
+    
+                // Increment count untuk status tertentu pada hari tertentu
+                $chartData['datasets'][0][$dayOfWeek][$statusName]++;
+            }
+    
+            return response()->json($chartData);
+        } catch (\Exception $e) {
+            \Log::error('Error in Doughnut endpoint: ' . $e->getMessage());
+            return response()->json(['error' => 'Internal Server Error', 'message' => $e->getMessage()], 500);
+        }
+    }
+            
 }    
