@@ -24,9 +24,9 @@ class LicensesController extends Controller
     public function MinitabBar(Request $request)
     {
         $result = [];
-    
+        
         $months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-    
+        
         foreach ($months as $month) {
             $monthlyUsed = Licenses::selectRaw('MAX(used) as used')
                 ->whereMonth('inserted_at', Carbon::parse("1 $month")->month)

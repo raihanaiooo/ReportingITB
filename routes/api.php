@@ -19,16 +19,12 @@ use Illuminate\Support\Facades\Route;
 */
 
 Route::group([
-
     'middleware' => 'api',
     'prefix' => 'auth'
-
 ], function ($router) {
-
     Route::post('login', [AuthController::class, 'login']);
     Route::post('refresh', [AuthController::class, 'refresh']);
     Route::post('me', [AuthController::class, 'me']);
-    
 });
 
 
@@ -48,3 +44,5 @@ Route::group([
     Route::get('bar', [TicketingController::class, 'Bar']);
     Route::get('doughnu t', [TicketingController::class, 'Doughnut']);    
 });
+
+Route::put('/adobe-crud', [CRUDController::class, 'updateApi'])->name('api.licenses.update');
