@@ -27,7 +27,7 @@ class DatabaseSeeder extends Seeder
 
         DB::table('status')->insert($statusData);
 
-        $apps = ['zoom', 'ms365', 'adobe', 'mathlab', 'minitab'];
+        $apps = ['zoom','A3S', 'adobe', 'mathlab', 'minitab', 'A3SB', 'Visio', 'Project'];
         $appData = array_map(function ($app) {
             return ['name' => $app];
         }, $apps);
