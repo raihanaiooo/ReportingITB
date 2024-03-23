@@ -37,14 +37,13 @@ const fetchDataSDP = async () => {
 			const response = await axios.get(fullUrl, {
 				headers: {
 					accept: "application/json, text/javascript, */*; q=0.01",
-					"accept-language":
-						"id-ID,id;q=0.9,ja-JP;q=0.8,ja;q=0.7,en-US;q=0.6,en;q=0.5",
+					"accept-language": "id-ID,id;q=0.9,en-US;q=0.8,en;q=0.7",
 					apiclient: "sdp_web",
 					"cache-control": "max-age=0",
 					"content-type": "application/x-www-form-urlencoded; charset=utf-8",
 					"if-modified-since": "Thu, 1 Jan 1970 00:00:00 GMT",
 					"sec-ch-ua":
-						'"Not A(Brand";v="99", "Google Chrome";v="121", "Chromium";v="121"',
+						'"Google Chrome";v="123", "Not:A-Brand";v="8", "Chromium";v="123"',
 					"sec-ch-ua-mobile": "?0",
 					"sec-ch-ua-platform": '"Windows"',
 					"sec-fetch-dest": "empty",
@@ -52,7 +51,7 @@ const fetchDataSDP = async () => {
 					"sec-fetch-site": "same-origin",
 					"x-requested-with": "XMLHttpRequest",
 					cookie:
-						"_ga=GA1.1.739500913.1706082526; _ga_T9ZME3XCCM=GS1.1.1706763419.5.0.1706763419.60.0.0; _ga_FZR0YZY0W6=GS1.1.1706763419.5.0.1706763419.0.0.0; SDPSESSIONID=4AFE6E9C9B1F00BF5717A545F5EAE570; JSESSIONIDSSO=D5340A9CAA367753E98767473F9E092A; PORTALID=1; sdpcsrfcookie=db079a9b22c2c3241b3122594457e0c321ce6440f6cca6f4ebda44f2b4b6fa7c2c4a68557e22d27fa530c51ca146e3adabebb2f64e970a17f4a26ac168bd686e; _zcsr_tmp=db079a9b22c2c3241b3122594457e0c321ce6440f6cca6f4ebda44f2b4b6fa7c2c4a68557e22d27fa530c51ca146e3adabebb2f64e970a17f4a26ac168bd686e",
+						"_ga_4P5NRFBN8P=GS1.3.1709016988.1.0.1709016988.0.0.0; _ga=GA1.1.739500913.1706082526; _ga_T9ZME3XCCM=GS1.1.1710300768.11.1.1710300808.20.0.0; _ga_FZR0YZY0W6=GS1.1.1710300768.11.1.1710300808.0.0.0; SDPSESSIONID=9725E57EA6ACDFE6BB4C03F67CCC68FA; JSESSIONIDSSO=1E8CBC3823C55BF1830955AD96054946; PORTALID=1; sdpcsrfcookie=ba33c1519955ac4a9883c1420fa78aaaffebb65cc2c97b112578a4b940def9fb0462fd093a76b6ee73b3e2be3d3663bcc3cef0c20eb4f0affcafd14deef01b76; _zcsr_tmp=ba33c1519955ac4a9883c1420fa78aaaffebb65cc2c97b112578a4b940def9fb0462fd093a76b6ee73b3e2be3d3663bcc3cef0c20eb4f0affcafd14deef01b76",
 					Referer: "https://it-helpdesk.itb.ac.id/WOListView.do",
 					"Referrer-Policy": "strict-origin-when-cross-origin",
 				},

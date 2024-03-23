@@ -47,7 +47,7 @@ const insertSDP = async (data) => {
 
 				// Insert into the 'ticketing' table with the corresponding status_id
 				const sql =
-					"INSERT INTO ticketing (id_scrape, created_time, status_id) VALUES (?, ?, ?)";
+					"INSERT INTO ticketing (id_scrape, created_time, status_id, created_at, updated_at) VALUES (?, ?, ?, NOW(), NOW())";
 
 				// Set createdTimeDisplayValue to null if it's undefined
 				const values = [
@@ -124,18 +124,7 @@ const insertMinitab = async (db, data) => {
 		);
 
 		if (existingRecord.length > 0) {
-			// If the record exists, update the 'used', 'available', and 'inserted_at' columns
-			const updateSql =
-				"UPDATE licenses SET used = ?, available = ?, inserted_at = ? WHERE app_type_id = ?";
-			const updateValues = [Total, 10060 - Total, currentTimestamp, appTypeId];
-
-			const updateResults = await db.execute(updateSql, updateValues);
-
-			console.log(
-				`Data with Total ${Total} updated in the database. Rows affected: ${updateResults.affectedRows}`
-			);
-		} else {
-			// If the record does not exist, insert a new record with the 'inserted_at' timestamp
+			// If the record exists, insert a new record with the 'inserted_at' timestamp
 			const insertSql =
 				"INSERT INTO licenses (total, app_type_id, used, available, inserted_at) VALUES (?, ?, ?, ?, ?)";
 			const insertValues = [
@@ -150,6 +139,17 @@ const insertMinitab = async (db, data) => {
 
 			console.log(
 				`Data with Total ${Total} inserted into the database. Rows affected: ${insertResults.affectedRows}`
+			);
+		} else {
+			// If the record does not exist, update the 'used', 'available', and 'inserted_at' columns
+			const updateSql =
+				"UPDATE licenses SET used = ?, available = ?, inserted_at = ? WHERE app_type_id = ?";
+			const updateValues = [Total, 10060 - Total, currentTimestamp, appTypeId];
+
+			const updateResults = await db.execute(updateSql, updateValues);
+
+			console.log(
+				`Data with Total ${Total} updated in the database. Rows affected: ${updateResults.affectedRows}`
 			);
 		}
 	} catch (error) {
