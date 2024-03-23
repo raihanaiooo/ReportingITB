@@ -121,10 +121,10 @@ class TicketingController extends Controller
                 4 => 'In Progress',
             ];
     
-            $currentDayOfWeek = date('D');
+            $currentDayOfWeek = strval(date('M d, Y'));
 
             $datas = Ticketing::select('status_id')
-                ->whereRaw("DAYNAME(STR_TO_DATE(created_time, '%b %d, %Y %h:%i %p')) = ?", [$currentDayOfWeek])
+                ->whereRaw("created_time LIKE CONCAT(?, '%')", [$currentDayOfWeek])
                 ->get();
             
             $chartData = [
