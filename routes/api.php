@@ -28,7 +28,7 @@ Route::group([
 });
 
 
-Route::put('/adobe', [CRUDController::class, 'updateApi'])->name('api.licenses.update');
+Route::put('/adobe-crud', [CRUDController::class, 'updateApi'])->name('api.licenses.update');
 
 
 Route::group([
@@ -38,8 +38,9 @@ Route::group([
 
 ], function ($router) {
     Route::get('minitab-bar', [LicensesController::class, 'MinitabBar']);
-    Route::get('/minitab', [LicensesController::class, 'Minitab']);
-    Route::get('/adobe', [LicensesController::class, 'Adobe']);
+    Route::get('minitab', [LicensesController::class, 'Minitab']);
+    Route::get('adobe', [LicensesController::class, 'Adobe']);
+    Route::get('adobe-bar', [LicensesController::class, 'AdobeBar']);
     Route::get('bar', [TicketingController::class, 'Bar']);
     Route::get('doughnut', [TicketingController::class, 'Doughnut']);    
 });
