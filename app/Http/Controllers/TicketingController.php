@@ -110,7 +110,63 @@ class TicketingController extends Controller
     
         return response()->json($result);
     }
-
-
     
+    public function Doughnut()
+    {
+        try {
+            $allStatuses = [
+                1 => 'Open',
+                2 => 'Closed',
+                3 => 'Resolved',
+                4 => 'In Progress',
+            ];
+    
+            $currentDayOfWeek = strval(date('M d, Y'));
+
+            $datas = Ticketing::select('status_id')
+                ->whereRaw("created_time LIKE CONCAT(?, '%')", [$currentDayOfWeek])
+                ->get();
+            
+            $chartData = [
+                'labels' => ['Open', 'Closed', 'Resolved', 'In Progress'],
+                'datasets' => [
+                    [
+                        'Open' => 0,
+                        'Closed' => 0,
+                        'Resolved' => 0,
+                        'In Progress' => 0,
+                    ],
+                ],
+                'day' => $currentDayOfWeek,
+            ];
+            
+            foreach ($datas as $data) {
+                $statusName = $allStatuses[$data->status_id];
+                $chartData['datasets'][0][$statusName]++;
+            }
+                
+            return response()->json($chartData);
+        } catch (\Exception $e) {
+            \Log::error('Error in Doughnut endpoint: ' . $e->getMessage());
+            return response()->json(['error' => 'Internal Server Error'], 500);
+        }
+    }              
+                                  
 }    
+
+        // \Log::info('SQL Query:');
+        // \Log::info(DB::getQueryLog());
+        // \Log::error('Error in Doughnut endpoint: ' . $e->getMessage() . ' File: ' . $e->getFile() . ' Line: ' . $e->getLine());
+                // // Log rentang tanggal
+                // \Log::info('Start Date: ' . $startDate);
+                // \Log::info('End Date: ' . $endDate);
+        
+                // // Log SQL query
+                // \Log::info('SQL Query:');
+                // \Log::info(DB::getQueryLog());
+        
+                // // Log fetched data structure
+                // \Log::info('Fetched Data Structure: ' . var_export($datas->toArray(), true));
+        
+                // // Log fetched data count
+                // \Log::info('Fetched Data Count: ' . count($datas));

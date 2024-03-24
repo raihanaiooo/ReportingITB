@@ -10,7 +10,7 @@ use Illuminate\Http\Request;
 
 class CRUDController extends Controller
 {
-    public function updateApi(Request $request)
+    public function updateAdobe(Request $request)
     {
         try {
             $request->validate([
