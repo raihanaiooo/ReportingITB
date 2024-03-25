@@ -26,6 +26,10 @@ Route::group([
 ], function ($router) {
     Route::get('minitab-bar', [LicensesController::class, 'MinitabBar']);
     Route::get('minitab', [LicensesController::class, 'Minitab']);
+    Route::get('zoom-bar', [LicensesController::class, 'ZoomBar']);
+    Route::get('zoom', [LicensesController::class, 'Zoom']);
+    Route::get('mathlab-bar', [LicensesController::class, 'MathlabBar']);
+    Route::get('mathlab', [LicensesController::class, 'Mathlab']);
     Route::get('adobe', [LicensesController::class, 'Adobe']);
     Route::get('adobe-bar', [LicensesController::class, 'AdobeBar']);
     Route::get('a3s', [LicensesController::class, 'A3S']);
@@ -41,4 +45,6 @@ Route::group([
 });
 
 Route::put('adobe-crud', [CRUDController::class, 'updateAdobe'])->name('api.licenses.update');
+Route::put('zoom-crud', [CRUDController::class, 'updateZoom'])->name('api.licenses.update');
+Route::put('mathlab-crud', [CRUDController::class, 'updateMathlab'])->name('api.licenses.update');
 Route::put('ms-crud', [CRUDController::class, 'updateMs'])->name('api.licenses.update');
