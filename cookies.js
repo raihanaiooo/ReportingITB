@@ -1,6 +1,9 @@
 import puppeteer from "puppeteer";
 import fs from "fs/promises";
 
+// Define cookies variable outside the functions
+let cookiesData = null;
+
 const loginPage = async () => {
 	try {
 		const browser = await puppeteer.launch({ headless: false });
@@ -9,22 +12,24 @@ const loginPage = async () => {
 
 		await page.click("#loginBoxSubContainer > div");
 		await page.type("#username", "helpdesk");
-		await page.type("#password", "Ganesha24!");
+		await page.type("#password", "Ganesha2024!");
 		await page.click("#loginSDPage");
 
-		// Wait for the login form to disappear, indicating navigation is complete
 		await page.waitForSelector("#loginBoxSubContainer", { hidden: true });
 
 		console.log("Login successful!");
 
-		// Save cookies after login
 		const cookies = await page.cookies();
-		await fs.writeFile("./cookies.json", JSON.stringify(cookies, null, 2));
+		cookiesData = JSON.stringify(cookies, null, 2);
 
-		console.log("Cookies saved:", JSON.stringify(cookies, null, 2));
+		await fs.writeFile("./cookies.json", cookiesData);
 
-		// Call refreshAndSaveToken every 10 seconds
+		console.log("Cookies saved:", cookiesData);
+
 		setInterval(async () => await refreshAndSaveToken(page), 10000); // Refresh every 10 seconds
+
+		// Call saveCookiesToFile after getting initial cookies
+		await saveCookiesToFile();
 
 		await browser.close();
 	} catch (error) {
@@ -34,12 +39,10 @@ const loginPage = async () => {
 
 const refreshAndSaveToken = async (page) => {
 	try {
-		// Set cookies from the file before making the request
 		const cookiesData = await fs.readFile("./cookies.json");
 		const cookies = JSON.parse(cookiesData);
 		await page.setCookie(...cookies);
 
-		// Example: Make an API call to refresh the token
 		const response = await page.evaluate(async () => {
 			try {
 				const result = await fetch("https://it-helpdesk.itb.ac.id/", {
@@ -65,11 +68,13 @@ const refreshAndSaveToken = async (page) => {
 
 		if (response && !response.error && response.cookies !== null) {
 			const updatedCookies = response.cookies;
-			await fs.writeFile(
-				"./cookies.json",
-				JSON.stringify(updatedCookies, null, 2)
-			);
+			const updatedCookiesData = JSON.stringify(updatedCookies, null, 2);
+			await fs.writeFile("./cookies.json", updatedCookiesData);
+			cookiesData = updatedCookiesData;
 			console.log("Token refreshed and updated!");
+
+			// Call saveCookiesToFile after updating cookies
+			await saveCookiesToFile();
 		} else {
 			console.error(
 				"Error refreshing token:",
@@ -83,5 +88,14 @@ const refreshAndSaveToken = async (page) => {
 	}
 };
 
-// Usage example
+const saveCookiesToFile = async () => {
+	try {
+		await fs.writeFile("sdp.js", `const cookiesData = ${cookiesData};`);
+		console.log("Cookies saved to sdp.js");
+	} catch (error) {
+		console.error("Error saving cookies to file:", error);
+	}
+};
+
+// Call loginPage to start the login process
 loginPage();
