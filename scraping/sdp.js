@@ -1,4 +1,5 @@
 import axios from "axios";
+import fs from "fs/promises";
 import { insertSDP } from "../db/insert.js";
 
 const url = "https://it-helpdesk.itb.ac.id/api/v3/requests";
@@ -34,8 +35,13 @@ const fetchDataSDP = async () => {
 		const fullUrl = `${url}?input_data=${queryParams}&SUBREQUEST=XMLHTTP&_=1706083864691`;
 
 		try {
+			// Baca cookies dari file cookies.json
+			const cookiesData = await fs.readFile("./cookies.json");
+
+			const cookies = JSON.parse(cookiesData);
 			const response = await axios.get(fullUrl, {
 				headers: {
+					// Buat header dengan menambahkan cookies ke dalamnya
 					accept: "application/json, text/javascript, */*; q=0.01",
 					"accept-language": "id-ID,id;q=0.9,en-US;q=0.8,en;q=0.7",
 					apiclient: "sdp_web",
@@ -50,8 +56,9 @@ const fetchDataSDP = async () => {
 					"sec-fetch-mode": "cors",
 					"sec-fetch-site": "same-origin",
 					"x-requested-with": "XMLHttpRequest",
-					cookie:
-						"_ga_4P5NRFBN8P=GS1.3.1709016988.1.0.1709016988.0.0.0; _ga=GA1.1.739500913.1706082526; _ga_T9ZME3XCCM=GS1.1.1710300768.11.1.1710300808.20.0.0; _ga_FZR0YZY0W6=GS1.1.1710300768.11.1.1710300808.0.0.0; SDPSESSIONID=9C031CBA54D5F5D17F0E455FD5148796; JSESSIONIDSSO=8717B06677CA34F4C9C281F928228E87; PORTALID=1; sdpcsrfcookie=c90d0369575c0adf33a3a9552535656abdaff88b17dd9696b35c5938d6481e451120704b3e9565a95c2d6abe7af4a3ff59680bd8d723f8713ed213b925a888ec; _zcsr_tmp=c90d0369575c0adf33a3a9552535656abdaff88b17dd9696b35c5938d6481e451120704b3e9565a95c2d6abe7af4a3ff59680bd8d723f8713ed213b925a888ec",
+					cookie: cookies
+						.map((cookie) => `${cookie.name}=${cookie.value}`)
+						.join("; "), // Menggunakan cookies dari file cookies.json
 					Referer: "https://it-helpdesk.itb.ac.id/WOListView.do",
 					"Referrer-Policy": "strict-origin-when-cross-origin",
 				},

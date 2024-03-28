@@ -4,8 +4,8 @@
 	"main": "main.js",
 	"type": "module",
 	"scripts": {
-		"start": "nodemon cookies.js",
-		"dev": "nodemon cookies.js"
+		"start": "nodemon index.js",
+		"dev": "nodemon index.js"
 	},
 	"keywords": [],
 	"author": "",
