@@ -1,43 +1,67 @@
 import puppeteer from "puppeteer";
 import fs from "fs/promises";
 
-// Define cookies variable outside the functions
 let cookiesData = null;
 
-const loginPage = async () => {
+// -------------------- FETCH COOKIES SDP --------------------
+const checkLogoutSDP = async (page) => {
 	try {
-		const browser = await puppeteer.launch({ headless: false });
-		const page = await browser.newPage();
-		await page.goto("https://it-helpdesk.itb.ac.id/");
+		// Cek apakah elemen logout muncul setelah logout
+		await page.waitForSelector("#loginSDPage", {
+			visible: true,
+			timeout: 3000,
+		});
 
-		await page.click("#loginBoxSubContainer > div");
-		await page.type("#username", "helpdesk");
-		await page.type("#password", "Ganesha2024!");
-		await page.click("#loginSDPage");
+		console.log("Logout detected. Refreshing token...");
 
-		await page.waitForSelector("#loginBoxSubContainer", { hidden: true });
+		// Jalankan kembali fungsi refreshTokenSDP
+		await refreshTokenSDP(page);
+	} catch (error) {
+		// Jika elemen logout tidak ditemukan, lanjutkan memantau
+		setTimeout(() => checkLogoutSDP(page), 1000);
+	}
+};
 
-		console.log("Login successful!");
+const loginSDP = async () => {
+	try {
+		// Cek apakah cookies sudah ada
+		const cookiesExist = await fs
+			.access("./cookies.json")
+			.then(() => true)
+			.catch(() => false);
+		// Jika cookies belum ada, lakukan proses login dan simpan cookies
+		if (!cookiesExist) {
+			const browser = await puppeteer.launch({ headless: false });
+			const page = await browser.newPage();
+			await page.goto("https://it-helpdesk.itb.ac.id/");
+			await page.click("#loginBoxSubContainer > div");
+			await page.type("#username", "helpdesk");
+			await page.type("#password", "Ganesha2024!");
+			await page.click("#loginSDPage");
 
-		const cookies = await page.cookies();
-		cookiesData = JSON.stringify(cookies, null, 2);
+			await page.waitForSelector("#loginBoxSubContainer", { hidden: true });
 
-		await fs.writeFile("./cookies.json", cookiesData);
+			console.log("Login successful!");
 
-		console.log("Cookies saved:", cookiesData);
+			// Setelah login sukses, simpan cookies
+			const cookies = await page.cookies();
+			cookiesData = JSON.stringify(cookies, null, 2);
+			await fs.writeFile("./cookies.json", cookiesData);
+			console.log("Cookies saved:", cookiesData);
 
-		setInterval(async () => await refreshAndSaveToken(page), 10000); // Refresh every 10 seconds
+			// Panggil checkLogout setelah login sukses untuk memantau logout
+			checkLogoutSDP(page);
 
-		// Call saveCookiesToFile after getting initial cookies
-		await saveCookiesToFile();
-
-		await browser.close();
+			await browser.close();
+		} else {
+			console.log("Cookies already exist. Skipping login.");
+		}
 	} catch (error) {
 		console.error("Error during login:", error);
 	}
 };
 
-const refreshAndSaveToken = async (page) => {
+const refreshTokenSDP = async (page) => {
 	try {
 		const cookiesData = await fs.readFile("./cookies.json");
 		const cookies = JSON.parse(cookiesData);
@@ -57,10 +81,10 @@ const refreshAndSaveToken = async (page) => {
 					throw new Error(`Failed to refresh token. Status: ${result.status}`);
 				}
 
-				return result.json(); // Parse the response as JSON
+				return result.json();
 			} catch (error) {
 				console.error("Error in API call:", error.message);
-				return { error: error.message }; // Return the error message
+				return { error: error.message };
 			}
 		});
 
@@ -72,9 +96,7 @@ const refreshAndSaveToken = async (page) => {
 			await fs.writeFile("./cookies.json", updatedCookiesData);
 			cookiesData = updatedCookiesData;
 			console.log("Token refreshed and updated!");
-
-			// Call saveCookiesToFile after updating cookies
-			await saveCookiesToFile();
+			await saveCookiesSDP();
 		} else {
 			console.error(
 				"Error refreshing token:",
@@ -88,7 +110,7 @@ const refreshAndSaveToken = async (page) => {
 	}
 };
 
-const saveCookiesToFile = async () => {
+const saveCookiesSDP = async () => {
 	try {
 		await fs.writeFile("sdp.js", `const cookiesData = ${cookiesData};`);
 		console.log("Cookies saved to sdp.js");
@@ -97,5 +119,148 @@ const saveCookiesToFile = async () => {
 	}
 };
 
-// Call loginPage to start the login process
-loginPage();
+// -------------------- FETCH COOKIES MINITAB --------------------
+
+const checkLogoutMinitab = async (page) => {
+	try {
+		// Cek apakah elemen logout muncul setelah logout
+		await page.waitForSelector("#signIn", {
+			visible: true,
+			timeout: 3000,
+		});
+
+		console.log("Logout detected. Refreshing token...");
+
+		// Jalankan kembali fungsi refreshTokenSDP
+		await refreshTokenMinitab(page);
+	} catch (error) {
+		// Jika elemen logout tidak ditemukan, lanjutkan memantau
+		setTimeout(() => checkLogoutMinitab(page), 1000);
+	}
+};
+
+const loginMinitab = async () => {
+	try {
+		// Cek apakah cookies sudah ada
+		const cookiesExist = await fs
+			.access("./minitab.json")
+			.then(() => true)
+			.catch(() => false);
+		// Jika cookies belum ada, lakukan proses login dan simpan cookies
+		if (!cookiesExist) {
+			const browser = await puppeteer.launch({ headless: false });
+			const page = await browser.newPage();
+			await page.goto("https://licensing.minitab.com/Login?ReturnUrl=%2F");
+
+			// Menunggu elemen untuk input email muncul
+			await page.waitForSelector("#userName", { visible: true });
+
+			// Memasukkan alamat email
+			await page.type("#userName", "software@itb.ac.id");
+
+			// Klik tombol "Sign In"
+			await page.click("#signIn");
+
+			// Tunggu beberapa saat agar halaman memuat setelah mengeklik "Sign In"
+			await page.waitForTimeout(2000);
+
+			// Memasukkan password
+			await page.type("#password", "Ganesha10!");
+
+			// Klik tombol "Sign In" setelah memasukkan password
+			await page.click("#signIn");
+
+			// await page.waitForSelector("#loginBoxSubContainer", { hidden: true });
+
+			console.log("Login successful!");
+
+			// Setelah login sukses, simpan cookies
+			const cookies = await page.cookies();
+			cookiesData = JSON.stringify(cookies, null, 2);
+			await fs.writeFile("./minitab.json", cookiesData);
+			console.log("Cookies saved:", cookiesData);
+
+			// Panggil checkLogout setelah login sukses untuk memantau logout
+			checkLogoutMinitab(page);
+
+			await browser.close();
+		} else {
+			console.log("Cookies already exist. Skipping login.");
+		}
+	} catch (error) {
+		console.error("Error during login:", error);
+	}
+};
+
+const refreshTokenMinitab = async (page) => {
+	try {
+		const cookiesData = await fs.readFile("./minitab.json");
+		const cookies = JSON.parse(cookiesData);
+		await page.setCookie(...cookies);
+
+		const response = await page.evaluate(async () => {
+			try {
+				const result = await fetch(
+					"https://licensing.minitab.com/Login?ReturnUrl=%2F",
+					{
+						method: "POST",
+						credentials: "include",
+						headers: {
+							"Content-Type": "application/json",
+						},
+					}
+				);
+
+				if (!result.ok) {
+					throw new Error(`Failed to refresh token. Status: ${result.status}`);
+				}
+
+				return result.json();
+			} catch (error) {
+				console.error("Error in API call:", error.message);
+				return { error: error.message };
+			}
+		});
+
+		console.log("API Response:", response);
+
+		if (response && !response.error && response.cookies !== null) {
+			const updatedCookies = response.cookies;
+			const updatedCookiesData = JSON.stringify(updatedCookies, null, 2);
+			await fs.writeFile("./minitab.json", updatedCookiesData);
+			cookiesData = updatedCookiesData;
+			console.log("Token refreshed and updated!");
+			await saveCookiesMinitab();
+		} else {
+			console.error(
+				"Error refreshing token:",
+				response && response.error
+					? response.error
+					: "Invalid response or null cookies"
+			);
+		}
+	} catch (error) {
+		console.error("Error refreshing token:", error);
+	}
+};
+
+const saveCookiesMinitab = async () => {
+	try {
+		await fs.writeFile("minitab.js", `const cookiesData = ${cookiesData};`);
+		console.log("Cookies saved to sdp.js");
+	} catch (error) {
+		console.error("Error saving cookies to file:", error);
+	}
+};
+
+const Login = async () => {
+	try {
+		await loginMinitab();
+		await loginSDP();
+		console.log("Both logins completed successfully.");
+	} catch (error) {
+		console.error("Error during login:", error);
+	}
+};
+
+Login();

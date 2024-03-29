@@ -1,10 +1,10 @@
 [
   {
     "name": "sdplogincsrfcookie",
-    "value": "bb241a4a-244a-4fb9-a028-5741d9d485d7",
+    "value": "ac04cdc5-f0a4-43fa-8eb9-911f1223baa0",
     "domain": "it-helpdesk.itb.ac.id",
     "path": "/",
-    "expires": 1711628752.995369,
+    "expires": 1711734812.161204,
     "size": 54,
     "httpOnly": false,
     "secure": true,
@@ -16,7 +16,7 @@
   },
   {
     "name": "_zcsr_tmp",
-    "value": "3382c8ca4baa6fe2c124cad3e0afa8c0e56b1bdb8e7b729c3233e6d667edfa5e045b3e4d6ba20ff0fe96e0dfdc90e5fcda82a259a21ad30fe44991f95a688cec",
+    "value": "0f5d7b79c1109d9111b46e76716b738a1038aca7439fc53fe3cc30d5a1f2541fdf6baf8b592889395b7d9692c8e4cf03380fe7fe934427c9caecbd6fe80f8c84",
     "domain": "it-helpdesk.itb.ac.id",
     "path": "/",
     "expires": -1,
@@ -46,7 +46,7 @@
   },
   {
     "name": "SDPSESSIONID",
-    "value": "404EEBFEBBD3572CE6B97CA51F16D17F",
+    "value": "F6DC9F965AAC766A963152B335E09DDD",
     "domain": "it-helpdesk.itb.ac.id",
     "path": "/",
     "expires": -1,
@@ -61,7 +61,7 @@
   },
   {
     "name": "JSESSIONIDSSO",
-    "value": "5CB80EFA7AF7FDBC6FFC433E0BE1A43E",
+    "value": "A98F07FE71B6152ABA12C16C8BDA4705",
     "domain": "it-helpdesk.itb.ac.id",
     "path": "/",
     "expires": -1,
@@ -76,7 +76,7 @@
   },
   {
     "name": "sdpcsrfcookie",
-    "value": "3382c8ca4baa6fe2c124cad3e0afa8c0e56b1bdb8e7b729c3233e6d667edfa5e045b3e4d6ba20ff0fe96e0dfdc90e5fcda82a259a21ad30fe44991f95a688cec",
+    "value": "0f5d7b79c1109d9111b46e76716b738a1038aca7439fc53fe3cc30d5a1f2541fdf6baf8b592889395b7d9692c8e4cf03380fe7fe934427c9caecbd6fe80f8c84",
     "domain": "it-helpdesk.itb.ac.id",
     "path": "/",
     "expires": -1,
