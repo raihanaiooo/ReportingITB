@@ -37,6 +37,7 @@ const loginSDP = async () => {
 			await page.click("#loginBoxSubContainer > div");
 			await page.type("#username", "helpdesk");
 			await page.type("#password", "Ganesha2024!");
+			await page.click("#signedInCB");
 			await page.click("#loginSDPage");
 
 			await page.waitForSelector("#loginBoxSubContainer", { hidden: true });
@@ -262,5 +263,5 @@ const Login = async () => {
 		console.error("Error during login:", error);
 	}
 };
-
-Login();
+// Login();
+export default Login;

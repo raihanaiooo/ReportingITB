@@ -1,4 +1,5 @@
 import axios from "axios";
+import Login from "../cookies.js";
 import fs from "fs/promises";
 import { insertSDP } from "../db/insert.js";
 
@@ -6,59 +7,72 @@ const url = "https://it-helpdesk.itb.ac.id/api/v3/requests";
 const MAX_RETRY = 3;
 const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
+// Fungsi untuk memeriksa apakah cookie telah kedaluwarsa
+const checkCookieExpiration = async (cookies) => {
+	const now = Date.now();
+	for (const cookie of cookies) {
+		if (cookie.expires && cookie.expires * 1000 < now) {
+			return true; // Cookie telah kedaluwarsa
+		}
+	}
+	return false; // Semua cookie masih valid
+};
+
+// Fungsi untuk melakukan login ulang jika cookie telah kedaluwarsa
+const loginIfCookieExpired = async () => {
+	try {
+		const cookiesData = await fs.readFile("./cookies.json");
+		const cookies = JSON.parse(cookiesData);
+
+		if (await checkCookieExpiration(cookies)) {
+			console.log("Cookies have expired. Logging in again...");
+			await Login(); // Lakukan login ulang
+		} else {
+			console.log("Cookies are still valid. Skipping login.");
+		}
+	} catch (error) {
+		console.error("Error during login check:", error);
+	}
+};
+
 const fetchDataSDP = async () => {
 	const allRequestIds = new Set(); // Menyimpan ID setiap request yang sudah diambil
+	await loginIfCookieExpired(); // Periksa apakah cookie telah kadaluarsa dan lakukan login ulang jika perlu
+	const currentYear = new Date().getFullYear();
 
 	const fetchPage = async (page, retry = 0) => {
 		const row_count = 25;
 		const start_index = (page - 1) * row_count;
 
-		const queryParams = encodeURIComponent(`{
-            "list_info": {
-                "start_index": ${start_index},
-                "sort_field": "requester.name",
-                "filter_by": {
-                    "id": "30"
-                },
-                "sort_order": "asc",
-                "row_count": "${row_count}",
-                "search_fields": {
-                    "is_service_request": true
-                },
-                "fields_required": [
-                    "requester", "status", "created_time"
-                ],
-                "get_total_count": true
-            }
-        }`);
+		const queryParams = encodeURIComponent(
+			JSON.stringify({
+				list_info: {
+					start_index: start_index,
+					sort_field: "requester.name",
+					filter_by: {
+						id: "30",
+					},
+					sort_order: "asc",
+					row_count: row_count,
+					search_fields: {
+						is_service_request: true,
+					},
+					fields_required: ["requester", "status", "created_time"],
+					get_total_count: true,
+				},
+			})
+		);
 
 		const fullUrl = `${url}?input_data=${queryParams}&SUBREQUEST=XMLHTTP&_=1706083864691`;
 
 		try {
 			// Baca cookies dari file cookies.json
 			const cookiesData = await fs.readFile("./cookies.json");
-
 			const cookies = JSON.parse(cookiesData);
+
 			const response = await axios.get(fullUrl, {
 				headers: {
-					// Buat header dengan menambahkan cookies ke dalamnya
-					accept: "application/json, text/javascript, */*; q=0.01",
-					"accept-language": "id-ID,id;q=0.9,en-US;q=0.8,en;q=0.7",
-					apiclient: "sdp_web",
-					"cache-control": "max-age=0",
-					"content-type": "application/x-www-form-urlencoded; charset=utf-8",
-					"if-modified-since": "Thu, 1 Jan 1970 00:00:00 GMT",
-					"sec-ch-ua":
-						'"Google Chrome";v="123", "Not:A-Brand";v="8", "Chromium";v="123"',
-					"sec-ch-ua-mobile": "?0",
-					"sec-ch-ua-platform": '"Windows"',
-					"sec-fetch-dest": "empty",
-					"sec-fetch-mode": "cors",
-					"sec-fetch-site": "same-origin",
-					"x-requested-with": "XMLHttpRequest",
-					cookie: cookies
-						.map((cookie) => `${cookie.name}=${cookie.value}`)
-						.join("; "), // Menggunakan cookies dari file cookies.json
+					...generateHeaders(cookies),
 					Referer: "https://it-helpdesk.itb.ac.id/WOListView.do",
 					"Referrer-Policy": "strict-origin-when-cross-origin",
 				},
@@ -83,10 +97,10 @@ const fetchDataSDP = async () => {
 			}
 
 			const currentPageRequests = response.data.requests || [];
+
 			const uniqueRequests = currentPageRequests.filter(
 				(request) => !allRequestIds.has(request.id)
 			);
-
 			currentPageRequests.forEach((request) => {
 				allRequestIds.add(request.id);
 			});
@@ -104,17 +118,25 @@ const fetchDataSDP = async () => {
 					.filter((createdTime) => createdTime !== undefined)
 					.map((createdTime) => ({ createdTime })),
 			});
+
+			// Insert only requests with created_time of the current year into the database
 			await Promise.all(
 				currentPageRequests.map(async (request) => {
 					try {
-						// Check if 'status' and 'id' are defined
-						if (request.status && request.status.name && request.id) {
+						if (request.id && request.status && request.status.name) {
 							const statusName = request.status.name;
+							const createdTimeDisplayValue =
+								request.created_time?.display_value;
 
-							// Check if the status is one of the allowed statuses
-							if (allowedStatuses.includes(statusName)) {
-								const createdTimeDisplayValue =
-									request.created_time?.display_value;
+							// Ubah created_time ke dalam objek Date
+							const createdTimeDate = createdTimeDisplayValue
+								? new Date(createdTimeDisplayValue)
+								: null;
+
+							if (
+								createdTimeDate &&
+								createdTimeDate.getFullYear() === currentYear
+							) {
 								await insertSDP({
 									requests: [
 										{
@@ -130,15 +152,12 @@ const fetchDataSDP = async () => {
 								);
 							} else {
 								console.log(
-									`Skipping request with ID ${request.id} due to invalid status.`
+									`Skipping request with ID ${request.id} due to invalid or non-current year created_time.`
 								);
-								console.log("Invalid Status Object:", request.status);
 							}
 						} else {
-							console.log(
-								`Skipping request with ID ${request.id} due to undefined or invalid status.`
-							);
-							console.log("Invalid Status Object:", request.status);
+							console.log(`Skipping request due to invalid id or status.`);
+							console.log("Request Data:", request);
 						}
 					} catch (error) {
 						console.error(
@@ -177,8 +196,10 @@ const fetchDataSDP = async () => {
 	};
 
 	try {
+		// Panggil fetchPage untuk mengambil data
 		const allRequests = await fetchPage(1);
 
+		// Tampilkan hasil pengambilan data
 		console.log("Data insertion completed.");
 		const requesterNames = allRequests.map((request) => request.requester.name);
 		console.log("Requester Names:", requesterNames);
@@ -191,6 +212,31 @@ const fetchDataSDP = async () => {
 	}
 
 	return fetchDataSDP;
+};
+
+// Helper function to generate headers
+const generateHeaders = (cookies) => {
+	const cookieString = cookies
+		.map((cookie) => `${cookie.name}=${cookie.value}`)
+		.join("; ");
+
+	return {
+		accept: "application/json, text/javascript, */*; q=0.01",
+		"accept-language": "id-ID,id;q=0.9,en-US;q=0.8,en;q=0.7",
+		apiclient: "sdp_web",
+		"cache-control": "max-age=0",
+		"content-type": "application/x-www-form-urlencoded; charset=utf-8",
+		"if-modified-since": "Thu, 1 Jan 1970 00:00:00 GMT",
+		"sec-ch-ua":
+			'"Google Chrome";v="123", "Not:A-Brand";v="8", "Chromium";v="123"',
+		"sec-ch-ua-mobile": "?0",
+		"sec-ch-ua-platform": '"Windows"',
+		"sec-fetch-dest": "empty",
+		"sec-fetch-mode": "cors",
+		"sec-fetch-site": "same-origin",
+		"x-requested-with": "XMLHttpRequest",
+		cookie: cookieString,
+	};
 };
 
 export default fetchDataSDP;
