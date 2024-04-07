@@ -37,10 +37,10 @@ const loginIfCookieExpired = async () => {
 
 const fetchDataSDP = async () => {
 	const allRequestIds = new Set(); // Menyimpan ID setiap request yang sudah diambil
-	await loginIfCookieExpired(); // Periksa apakah cookie telah kadaluarsa dan lakukan login ulang jika perlu
+	await loginIfCookieExpired(); // Periksa apakah cookie telah kadaluwarsa dan lakukan login ulang jika perlu
 	const currentYear = new Date().getFullYear();
 
-	const fetchPage = async (page, retry = 0) => {
+	const fetchPage = async (page, retry = 0, recordsFetched = 0) => {
 		const row_count = 25;
 		const start_index = (page - 1) * row_count;
 
@@ -78,7 +78,7 @@ const fetchDataSDP = async () => {
 				},
 			});
 
-			console.log(`Successful response for page ${page}:`, response.data);
+			// console.log(`Successful response for page ${page}:`, response.data);
 
 			if (response.data && response.data.response_status) {
 				const { status_code, messages, status } = response.data.response_status;
@@ -168,7 +168,15 @@ const fetchDataSDP = async () => {
 				})
 			);
 
-			const nextPageRequests = await fetchPage(page + 1);
+			recordsFetched += uniqueRequests.length;
+
+			if (recordsFetched >= 200) {
+				console.log("50 records fetched. Pausing for 1 minute.");
+				await delay(60000); // Pause for 1 minute
+				recordsFetched = 0; // Reset records counter
+			}
+
+			const nextPageRequests = await fetchPage(page + 1, 0, recordsFetched);
 			await delay(1000); // Introduce a delay of 1 second between requests
 			return uniqueRequests.concat(nextPageRequests);
 		} catch (error) {
@@ -187,7 +195,7 @@ const fetchDataSDP = async () => {
 
 			if (error.code === "ETIMEDOUT" && retry < MAX_RETRY) {
 				console.log(`Retrying... (attempt ${retry + 1}/${MAX_RETRY})`);
-				return await fetchPage(page, retry + 1);
+				return await fetchPage(page, retry + 1, recordsFetched);
 			}
 
 			console.error("Request failed. Check the request data and parameters.");

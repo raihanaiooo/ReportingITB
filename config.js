@@ -7,7 +7,7 @@ const createDbPool = () => {
 		password: "",
 		database: "reporting_web",
 		waitForConnections: true,
-		connectionLimit: 10,
+		connectionLimit: 20000,
 		queueLimit: 0,
 	});
 

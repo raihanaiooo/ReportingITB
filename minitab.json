@@ -1,10 +1,24 @@
 [
   {
+    "name": "ssi",
+    "value": "1",
+    "domain": "licensing.minitab.com",
+    "path": "/",
+    "expires": 1744003996,
+    "size": 4,
+    "httpOnly": false,
+    "secure": false,
+    "session": false,
+    "sameParty": false,
+    "sourceScheme": "Secure",
+    "sourcePort": 443
+  },
+  {
     "name": "OptanonConsent",
-    "value": "isGpcEnabled=0&datestamp=Fri+Mar+29+2024+19%3A58%3A19+GMT%2B0700+(Indochina+Time)&version=202310.1.0&browserGpcFlag=0&isIABGlobal=false&hosts=&consentId=b64971f8-fc24-452d-b61a-aa9d345ec22c&interactionCount=0&landingPath=https%3A%2F%2Flicensing.minitab.com%2FLogin%3FReturnUrl%3D%252F&groups=C0001%3A1%2CC0002%3A0%2CC0003%3A0%2CC0004%3A0%2CC0005%3A0",
+    "value": "isGpcEnabled=0&datestamp=Sun+Apr+07+2024+12%3A33%3A16+GMT%2B0700+(Indochina+Time)&version=202310.1.0&browserGpcFlag=0&isIABGlobal=false&hosts=&consentId=4f5c8c1a-55a4-418a-bbc5-8a2e9c78c781&interactionCount=0&landingPath=https%3A%2F%2Flicensing.minitab.com%2FLogin%3FReturnUrl%3D%252F&groups=C0001%3A1%2CC0002%3A0%2CC0003%3A0%2CC0004%3A0%2CC0005%3A0",
     "domain": ".minitab.com",
     "path": "/",
-    "expires": 1743253099,
+    "expires": 1744003996,
     "size": 363,
     "httpOnly": false,
     "secure": false,

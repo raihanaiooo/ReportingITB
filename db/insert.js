@@ -9,11 +9,6 @@ const insertSDP = async (data) => {
 			throw new Error("Invalid data format or missing requests array");
 		}
 
-		connection = await pool.getConnection();
-		const queryAsync = connection.execute.bind(connection);
-
-		await connection.beginTransaction();
-
 		for (const requestData of data.requests) {
 			const { id, status, createdTimeDisplayValue } = requestData;
 
@@ -25,6 +20,10 @@ const insertSDP = async (data) => {
 					);
 					continue;
 				}
+
+				connection = await pool.getConnection();
+				const queryAsync = connection.execute.bind(connection);
+				await connection.beginTransaction();
 
 				console.log("Attempting to insert data:", {
 					id,
@@ -63,37 +62,32 @@ const insertSDP = async (data) => {
 				console.log(
 					`Data with ID ${id} inserted into the database. Rows affected: ${results.affectedRows}`
 				);
+
+				// Commit the transaction
+				await connection.commit();
 			} catch (error) {
 				console.error(`Error inserting data with ID ${id}:`, error.message);
 				console.error("SQL Error Code:", error.code);
 				console.error("SQL Error Number:", error.errno);
 				console.error("SQL Error SQL State:", error.sqlState);
+
+				if (connection) {
+					await connection.rollback();
+				}
+			} finally {
+				if (connection) {
+					await connection.release();
+				}
 			}
 		}
 
-		// Commit the transaction
-		await connection.commit();
-
-		console.log("Data inserted into the database successfully.");
+		console.log("Data insertion completed.");
 	} catch (error) {
 		console.error("Error inserting data into the database:", error.message);
 		console.error("SQL Error Code:", error.code);
 		console.error("SQL Error Number:", error.errno);
 		console.error("SQL Error SQL State:", error.sqlState);
-
-		if (connection) {
-			await connection.rollback();
-		}
-
 		throw error;
-	} finally {
-		if (connection) {
-			try {
-				await connection.release();
-			} catch (releaseError) {
-				console.error("Error releasing connection:", releaseError.message);
-			}
-		}
 	}
 };
 

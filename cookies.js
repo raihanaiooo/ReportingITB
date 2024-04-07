@@ -153,22 +153,13 @@ const loginMinitab = async () => {
 			const page = await browser.newPage();
 			await page.goto("https://licensing.minitab.com/Login?ReturnUrl=%2F");
 
-			// Menunggu elemen untuk input email muncul
 			await page.waitForSelector("#userName", { visible: true });
-
-			// Memasukkan alamat email
 			await page.type("#userName", "software@itb.ac.id");
-
-			// Klik tombol "Sign In"
+			await page.click("#keepSignIn");
 			await page.click("#signIn");
-
-			// Tunggu beberapa saat agar halaman memuat setelah mengeklik "Sign In"
 			await page.waitForTimeout(2000);
-
-			// Memasukkan password
+			await page.waitForSelector("#password", { visible: true });
 			await page.type("#password", "Ganesha10!");
-
-			// Klik tombol "Sign In" setelah memasukkan password
 			await page.click("#signIn");
 
 			// await page.waitForSelector("#loginBoxSubContainer", { hidden: true });
@@ -256,8 +247,8 @@ const saveCookiesMinitab = async () => {
 
 const Login = async () => {
 	try {
-		await loginMinitab();
 		await loginSDP();
+		await loginMinitab();
 		console.log("Both logins completed successfully.");
 	} catch (error) {
 		console.error("Error during login:", error);

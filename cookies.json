@@ -1,7 +1,7 @@
 [
   {
     "name": "_zcsr_tmp",
-    "value": "2c9c825483b09f4005ae86e958efd1854383ff2a9e58d644864e4cf1f4bca168b08cb0eda0132480482bf3f163946e9fb0603eae42c80df0b4e0fed0ea6a8239",
+    "value": "d3cfd56cb5180575c57de16e492028133b40d04913d10375fcb35043ceceb460c12b673386e29561c53163fa1eb3a2e6c27516cdec2e2e2afbb996fc5d7b70bb",
     "domain": "it-helpdesk.itb.ac.id",
     "path": "/",
     "expires": -1,
@@ -16,7 +16,7 @@
   },
   {
     "name": "sdpcsrfcookie",
-    "value": "2c9c825483b09f4005ae86e958efd1854383ff2a9e58d644864e4cf1f4bca168b08cb0eda0132480482bf3f163946e9fb0603eae42c80df0b4e0fed0ea6a8239",
+    "value": "d3cfd56cb5180575c57de16e492028133b40d04913d10375fcb35043ceceb460c12b673386e29561c53163fa1eb3a2e6c27516cdec2e2e2afbb996fc5d7b70bb",
     "domain": "it-helpdesk.itb.ac.id",
     "path": "/",
     "expires": -1,
@@ -30,11 +30,11 @@
     "sourcePort": 443
   },
   {
-    "name": "mesdp8db9c6db04",
-    "value": "865e147aa0bd0dd252c7980c6788768bc9aaabf96829c199006ca26c110b1f76",
+    "name": "mesdpcdf30013a8",
+    "value": "a818cbd112e558751ba9dd00f54634de740186583f3559b2c15933c56dbf3ed5",
     "domain": "it-helpdesk.itb.ac.id",
     "path": "/",
-    "expires": 1716351343.845859,
+    "expires": 1716353859.858558,
     "size": 79,
     "httpOnly": true,
     "secure": true,
@@ -49,7 +49,7 @@
     "value": "true",
     "domain": "it-helpdesk.itb.ac.id",
     "path": "/",
-    "expires": 1716351343.845778,
+    "expires": 1716353859.858478,
     "size": 8,
     "httpOnly": true,
     "secure": true,
@@ -61,10 +61,10 @@
   },
   {
     "name": "febbc30d",
-    "value": "de80dc7269cd4d268a0508afa09ad26d",
+    "value": "57c6cef898a041cf810058d98075f6fa",
     "domain": "it-helpdesk.itb.ac.id",
     "path": "/",
-    "expires": 1716351343.845822,
+    "expires": 1716353859.858509,
     "size": 40,
     "httpOnly": true,
     "secure": true,
@@ -91,7 +91,7 @@
   },
   {
     "name": "JSESSIONIDSSO",
-    "value": "054FEE8CF577013009CB3F8BE89DB60F",
+    "value": "A6D3E0A67B339F5B23EF5D8F1741A01F",
     "domain": "it-helpdesk.itb.ac.id",
     "path": "/",
     "expires": -1,
@@ -106,7 +106,7 @@
   },
   {
     "name": "SDPSESSIONID",
-    "value": "9D66891EF8A57BB1094AB4EF2474FC3F",
+    "value": "DDB5AEFCBFCD42D12B543B0BD6E8E30F",
     "domain": "it-helpdesk.itb.ac.id",
     "path": "/",
     "expires": -1,
