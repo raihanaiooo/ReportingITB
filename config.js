@@ -11,6 +11,17 @@ const createDbPool = () => {
 		queueLimit: 0,
 	});
 
+	// Menambahkan event handler untuk menutup koneksi setiap kali koneksi diambil dari pool
+	pool.on("acquire", (connection) => {
+		console.log("Connection %d acquired", connection.threadId);
+	});
+
+	// Menambahkan event handler untuk menutup koneksi setiap kali koneksi dikembalikan ke pool
+	pool.on("release", (connection) => {
+		console.log("Connection %d released", connection.threadId);
+		connection.destroy(); // Menutup koneksi secara eksplisit
+	});
+
 	return pool;
 };
 

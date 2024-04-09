@@ -37,6 +37,8 @@ const loginIfCookieExpired = async () => {
 
 const fetchDataSDP = async () => {
 	const allRequestIds = new Set(); // Menyimpan ID setiap request yang sudah diambil
+	const uniqueCreatedTimes = new Set(); // Menyimpan created_time yang sudah diambil
+
 	await loginIfCookieExpired(); // Periksa apakah cookie telah kadaluwarsa dan lakukan login ulang jika perlu
 	const currentYear = new Date().getFullYear();
 
@@ -78,85 +80,87 @@ const fetchDataSDP = async () => {
 				},
 			});
 
-			// console.log(`Successful response for page ${page}:`, response.data);
-
 			if (response.data && response.data.response_status) {
-				const { status_code, messages, status } = response.data.response_status;
+				const { status_code, type, message } = response.data.response_status;
 
-				if (status === "failed") {
+				if (type === "failed" && status_code === 4001) {
+					console.error(
+						"URL blocked due to maximum access limit. Retrying after some time..."
+					);
+					await delay(300000); // Tunggu 5 menit sebelum mencoba lagi (300000 ms)
+					return await fetchPage(page, retry + 1, recordsFetched);
+				} else if (type === "failed") {
 					console.error(`Failed to fetch data. Status code: ${status_code}`);
 					messages.forEach((message, index) => {
 						console.error(`Error message ${index + 1}:`, message);
 					});
-
-					// Log the request URL for debugging
 					console.error("Failed URL:", fullUrl);
-
 					return [];
 				}
 			}
 
 			const currentPageRequests = response.data.requests || [];
 
+			// Filter hanya untuk request yang belum pernah diambil sebelumnya
 			const uniqueRequests = currentPageRequests.filter(
 				(request) => !allRequestIds.has(request.id)
 			);
-			currentPageRequests.forEach((request) => {
+
+			// Tambahkan ID dari request yang baru diambil ke dalam set
+			uniqueRequests.forEach((request) => {
 				allRequestIds.add(request.id);
 			});
 
-			// Specify the statuses you want to fetch
-			const allowedStatuses = ["Open", "In Progress", "Closed", "Resolved"];
-			// Fetch created_time for all requests first
-			const createdTimes = currentPageRequests.map(
-				(request) => request.created_time?.display_value
-			);
-
-			// Filter out undefined values and insert all created_times into the database
-			await insertSDP({
-				requests: createdTimes
-					.filter((createdTime) => createdTime !== undefined)
-					.map((createdTime) => ({ createdTime })),
+			// Filter hanya request dengan created_time pada tahun ini
+			const currentYearRequests = uniqueRequests.filter((request) => {
+				const createdTimeDisplayValue = request.created_time?.display_value;
+				if (createdTimeDisplayValue) {
+					const createdTimeDate = new Date(createdTimeDisplayValue);
+					return createdTimeDate.getFullYear() === currentYear;
+				}
+				return false;
 			});
 
-			// Insert only requests with created_time of the current year into the database
+			// Filter hanya request yang created_time nya unik
+			const uniqueCurrentYearRequests = currentYearRequests.filter(
+				(request) => {
+					const createdTimeDisplayValue = request.created_time?.display_value;
+					if (
+						createdTimeDisplayValue &&
+						!uniqueCreatedTimes.has(createdTimeDisplayValue)
+					) {
+						uniqueCreatedTimes.add(createdTimeDisplayValue);
+						return true;
+					}
+					return false;
+				}
+			);
+
+			// Insert data ke dalam database
 			await Promise.all(
-				currentPageRequests.map(async (request) => {
+				uniqueCurrentYearRequests.map(async (request) => {
 					try {
 						if (request.id && request.status && request.status.name) {
 							const statusName = request.status.name;
 							const createdTimeDisplayValue =
 								request.created_time?.display_value;
+							await insertSDP({
+								requests: [
+									{
+										id: request.id,
+										status: statusName,
+										createdTimeDisplayValue: createdTimeDisplayValue || null,
+									},
+								],
+							});
 
-							// Ubah created_time ke dalam objek Date
-							const createdTimeDate = createdTimeDisplayValue
-								? new Date(createdTimeDisplayValue)
-								: null;
-
-							if (
-								createdTimeDate &&
-								createdTimeDate.getFullYear() === currentYear
-							) {
-								await insertSDP({
-									requests: [
-										{
-											id: request.id,
-											status: statusName,
-											createdTimeDisplayValue: createdTimeDisplayValue || null,
-										},
-									],
-								});
-
-								console.log(
-									`Data with ID ${request.id} inserted into the database.`
-								);
-							} else {
-								console.log(
-									`Skipping request with ID ${request.id} due to invalid or non-current year created_time.`
-								);
-							}
+							console.log(
+								`Data with ID ${request.id} inserted into the database.`
+							);
 						} else {
-							console.log(`Skipping request due to invalid id or status.`);
+							console.log(
+								`Skipping request due to invalid id, status, or created_time.`
+							);
 							console.log("Request Data:", request);
 						}
 					} catch (error) {
@@ -168,7 +172,7 @@ const fetchDataSDP = async () => {
 				})
 			);
 
-			recordsFetched += uniqueRequests.length;
+			recordsFetched += uniqueCurrentYearRequests.length;
 
 			if (recordsFetched >= 200) {
 				console.log("50 records fetched. Pausing for 1 minute.");
@@ -176,21 +180,22 @@ const fetchDataSDP = async () => {
 				recordsFetched = 0; // Reset records counter
 			}
 
+			if (currentPageRequests.length === 0) {
+				return []; // No more pages to fetch, exit recursion
+			}
+
 			const nextPageRequests = await fetchPage(page + 1, 0, recordsFetched);
 			await delay(1000); // Introduce a delay of 1 second between requests
-			return uniqueRequests.concat(nextPageRequests);
+			return uniqueCurrentYearRequests.concat(nextPageRequests);
 		} catch (error) {
 			console.error("Error:", error.message);
 
-			if (error.response && error.response.data) {
-				console.error("Full Server Response:", error.response.data);
-
-				const { messages } = error.response.data.response_status;
-				if (messages) {
-					messages.forEach((message, index) => {
-						console.error(`Error message ${index + 1}:`, message);
-					});
-				}
+			if (error.response && error.response.status === 400) {
+				console.error(
+					"Request failed with status code 400. Retrying after some time..."
+				);
+				await delay(300000); // Tunggu 5 menit sebelum mencoba lagi (300000 ms)
+				return await fetchPage(page, retry + 1, recordsFetched);
 			}
 
 			if (error.code === "ETIMEDOUT" && retry < MAX_RETRY) {
@@ -247,4 +252,33 @@ const generateHeaders = (cookies) => {
 	};
 };
 
-export default fetchDataSDP;
+const fetchedDataSDP = async () => {
+	const recordsPerIteration = 100;
+	const fetchInterval = 5 * 60 * 1000; // 5 minutes in milliseconds
+	let lastPageFetched = 1; // Variable to keep track of the last page fetched
+
+	while (true) {
+		try {
+			const allRequests = await fetchDataSDP(lastPageFetched); // Fetch data starting from the last fetched page
+
+			if (allRequests.length === 0) {
+				console.log("No more data to fetch. Exiting...");
+				break; // Exit loop if there's no more data
+			}
+
+			lastPageFetched++; // Increment the last page fetched
+
+			// Tampilkan pesan jika telah mencapai batas jumlah record per iterasi
+			if (allRequests.length >= recordsPerIteration) {
+				console.log(
+					`Fetched ${recordsPerIteration} records. Pausing for 5 minutes.`
+				);
+				await delay(fetchInterval); // Pause for 5 minutes
+			}
+		} catch (error) {
+			console.error("Error fetching data:", error.message);
+		}
+	}
+};
+
+export default fetchedDataSDP;
