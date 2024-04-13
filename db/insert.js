@@ -1,5 +1,8 @@
 import createDbPool from "../config.js";
 
+// Atur struktur data tambahan untuk melacak createdTimeDisplayValue yang sudah ada
+const existingCreatedTimeDisplayValues = new Set();
+
 const insertSDP = async (data) => {
 	const pool = createDbPool();
 	let connection;
@@ -30,6 +33,19 @@ const insertSDP = async (data) => {
 					status,
 					createdTimeDisplayValue,
 				});
+
+				// Periksa apakah data dengan created_time yang sama sudah ada dalam database
+				const existingData = await queryAsync(
+					"SELECT COUNT(*) AS count FROM ticketing WHERE created_time = ?",
+					[createdTimeDisplayValue]
+				);
+
+				if (existingData[0][0].count > 0) {
+					console.log(
+						`Data dengan created_time ${createdTimeDisplayValue} sudah ada. Lewati penyisipan...`
+					);
+					continue;
+				}
 
 				// Fetch the corresponding status_id from the 'status' table based on the 'status' name
 				const statusResult = await queryAsync(

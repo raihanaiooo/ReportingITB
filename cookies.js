@@ -17,8 +17,11 @@ const checkLogoutSDP = async (page) => {
 		// Jalankan kembali fungsi refreshTokenSDP
 		await refreshTokenSDP(page);
 	} catch (error) {
-		// Jika elemen logout tidak ditemukan, lanjutkan memantau
-		setTimeout(() => checkLogoutSDP(page), 1000);
+		// Jika elemen logout tidak ditemukan, panggil fetchFreshCookies
+		console.log(
+			"Cookies expired or logout detected. Fetching fresh cookies..."
+		);
+		await fetchFreshCookies();
 	}
 };
 
@@ -29,10 +32,12 @@ const loginSDP = async () => {
 			.access("./cookies.json")
 			.then(() => true)
 			.catch(() => false);
-		// Jika cookies belum ada, lakukan proses login dan simpan cookies
+
+		let page;
+
 		if (!cookiesExist) {
 			const browser = await puppeteer.launch({ headless: false });
-			const page = await browser.newPage();
+			page = await browser.newPage();
 			await page.goto("https://it-helpdesk.itb.ac.id/");
 			await page.click("#loginBoxSubContainer > div");
 			await page.type("#username", "helpdesk");
@@ -46,16 +51,18 @@ const loginSDP = async () => {
 
 			// Setelah login sukses, simpan cookies
 			const cookies = await page.cookies();
-			cookiesData = JSON.stringify(cookies, null, 2);
+			const cookiesData = JSON.stringify(cookies, null, 2);
 			await fs.writeFile("./cookies.json", cookiesData);
 			console.log("Cookies saved:", cookiesData);
-
-			// Panggil checkLogout setelah login sukses untuk memantau logout
-			checkLogoutSDP(page);
 
 			await browser.close();
 		} else {
 			console.log("Cookies already exist. Skipping login.");
+		}
+
+		// Panggil checkLogout hanya sekali setelah login
+		if (page) {
+			await checkLogoutSDP(page);
 		}
 	} catch (error) {
 		console.error("Error during login:", error);
@@ -117,6 +124,40 @@ const saveCookiesSDP = async () => {
 		console.log("Cookies saved to sdp.js");
 	} catch (error) {
 		console.error("Error saving cookies to file:", error);
+	}
+};
+
+const fetchFreshCookies = async () => {
+	try {
+		// Hapus file cookies.json jika sudah ada
+		await fs.unlink("./cookies.json");
+
+		// Fetch cookies yang baru
+		const browser = await puppeteer.launch({ headless: false });
+		const page = await browser.newPage();
+		await page.goto("https://it-helpdesk.itb.ac.id/");
+
+		// Isi form login jika diperlukan
+		await page.click("#loginBoxSubContainer > div");
+		await page.type("#username", "helpdesk");
+		await page.type("#password", "Ganesha2024!");
+		await page.click("#signedInCB");
+		await page.click("#loginSDPage");
+
+		// Tunggu hingga proses login selesai
+		await page.waitForSelector("#loginBoxSubContainer", { hidden: true });
+
+		console.log("Login successful!");
+
+		// Simpan cookies yang baru
+		const cookies = await page.cookies();
+		const cookiesData = JSON.stringify(cookies, null, 2);
+		await fs.writeFile("./cookies.json", cookiesData);
+		console.log("New cookies saved:", cookiesData);
+
+		await browser.close();
+	} catch (error) {
+		console.error("Error fetching fresh cookies:", error);
 	}
 };
 
