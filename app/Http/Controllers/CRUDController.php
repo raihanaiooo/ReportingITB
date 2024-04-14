@@ -17,11 +17,9 @@ class CRUDController extends Controller
                 'used' => 'required|integer',
             ]);
     
-            // Find the license based on app_type_id equal to 3
             $existingLicense = Licenses::where('app_type_id', 3)->first();
     
             if ($existingLicense) {
-                // If the license already exists, update the existing license
                 $available = $existingLicense->total - $request->input('used');
     
                 $existingLicense->update([
@@ -30,11 +28,10 @@ class CRUDController extends Controller
                     'inserted_at' => Carbon::now(),
                 ]);
             } else {
-                // If no existing license, create a new instance and save it
                 $newLicense = new Licenses();
                 $newLicense->app_type_id = 3;
                 $newLicense->used = $request->input('used');
-                $newLicense->available = $newLicense->total - $request->input('used'); // Assuming total is already in the database
+                $newLicense->available = $newLicense->total - $request->input('used'); 
                 $newLicense->inserted_at = Carbon::now();
                 $newLicense->save();
             }
@@ -55,11 +52,9 @@ class CRUDController extends Controller
                 'used' => 'required|integer',
             ]);
     
-            // Find the license based on app_type_id equal to 3
             $existingLicense = Licenses::where('app_type_id', 1)->first();
     
             if ($existingLicense) {
-                // If the license already exists, update the existing license
                 $available = $existingLicense->total - $request->input('used');
     
                 $existingLicense->update([
@@ -68,7 +63,6 @@ class CRUDController extends Controller
                     'inserted_at' => Carbon::now(),
                 ]);
             } else {
-                // If no existing license, create a new instance and save it
                 $newLicense = new Licenses();
                 $newLicense->app_type_id = 1;
                 $newLicense->used = $request->input('used');
