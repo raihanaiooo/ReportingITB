@@ -126,9 +126,8 @@ class TicketingController extends Controller
             $datas = Ticketing::select('status_id')
                 ->whereRaw("created_time LIKE CONCAT(?, '%')", [$currentDayOfWeek])
                 ->get();
-            
-            $chartData = [
-                'labels' => ['Open', 'Closed', 'Resolved', 'In Progress'],
+                $chartData = [
+                    'labels' => ['Open', 'Closed', 'Resolved', 'In Progress'],
                 'datasets' => [
                     [
                         'Open' => 0,
@@ -140,6 +139,7 @@ class TicketingController extends Controller
                 'day' => $currentDayOfWeek,
             ];
             
+            return response()->json($datas);
             foreach ($datas as $data) {
                 $statusName = $allStatuses[$data->status_id];
                 $chartData['datasets'][0][$statusName]++;
@@ -149,24 +149,8 @@ class TicketingController extends Controller
         } catch (\Exception $e) {
             \Log::error('Error in Doughnut endpoint: ' . $e->getMessage());
             return response()->json(['error' => 'Internal Server Error'], 500);
+            
         }
     }              
                                   
 }    
-
-        // \Log::info('SQL Query:');
-        // \Log::info(DB::getQueryLog());
-        // \Log::error('Error in Doughnut endpoint: ' . $e->getMessage() . ' File: ' . $e->getFile() . ' Line: ' . $e->getLine());
-                // // Log rentang tanggal
-                // \Log::info('Start Date: ' . $startDate);
-                // \Log::info('End Date: ' . $endDate);
-        
-                // // Log SQL query
-                // \Log::info('SQL Query:');
-                // \Log::info(DB::getQueryLog());
-        
-                // // Log fetched data structure
-                // \Log::info('Fetched Data Structure: ' . var_export($datas->toArray(), true));
-        
-                // // Log fetched data count
-                // \Log::info('Fetched Data Count: ' . count($datas));

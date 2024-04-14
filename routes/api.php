@@ -35,7 +35,7 @@ Route::group([
     Route::get('a3s', [LicensesController::class, 'A3S']);
     Route::get('a3s-bar', [LicensesController::class, 'A3SBar']);
     Route::get('a3sb', [LicensesController::class, 'A3SB']);
-    Route::get('a3sb-bar', [LicensesController::class, 'A3SB']);
+    Route::get('a3sb-bar', [LicensesController::class, 'A3SBBar']);
     Route::get('visio', [LicensesController::class, 'Visio']);
     Route::get('visio-bar', [LicensesController::class, 'VisioBar']);
     Route::get('project', [LicensesController::class, 'Project']);

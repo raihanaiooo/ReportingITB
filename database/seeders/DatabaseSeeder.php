@@ -9,16 +9,8 @@ use App\Models\User;
 
 class DatabaseSeeder extends Seeder
 {
-    /**
-     * Seed the application's database.
-     */
     public function run(): void
     {
-        User::create([
-            'name' => 'Example User',
-            'email' => 'user@example.com',
-            'password' => bcrypt('password'),
-        ]);
 
         $statuses = ['open', 'closed', 'resolved', 'in progress'];
         $statusData = array_map(function ($status) {
@@ -33,14 +25,5 @@ class DatabaseSeeder extends Seeder
         }, $apps);
 
         DB::table('app')->insert($appData);
-
-        DB::table('licenses')->insert([
-            [
-                'total' => 1151,
-                'used' => 824,
-                'available' => 1151-824,
-                'app_type_id' => 3
-            ],
-        ]);
     }
 }
