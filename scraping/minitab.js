@@ -8,18 +8,16 @@ const pool = createDbPool();
 const apiUrl =
 	"https://licensing.minitab.com/api/v1/subscriptions/8b127d5f3f48492cbed3ac291a9e2533/products/e68147de1c46451bafadcfcc44e196cc/users?q=";
 
-// Fungsi untuk memeriksa apakah cookie telah kedaluwarsa
 const checkCookieExpiration = async (cookies) => {
 	const now = Date.now();
 	for (const cookie of cookies) {
 		if (cookie.expires && cookie.expires * 1000 < now) {
-			return true; // Cookie telah kedaluwarsa
+			return true;
 		}
 	}
-	return false; // Semua cookie masih valid
+	return false;
 };
 
-// Fungsi untuk melakukan login ulang jika cookie telah kedaluwarsa
 const loginIfCookieExpired = async () => {
 	try {
 		const cookiesData = await fs.readFile("./minitab.json");

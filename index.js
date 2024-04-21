@@ -6,6 +6,8 @@ import {
 	checkData,
 } from "./scraping/sdp.js";
 
+import fetchDataMinitab from "./scraping/minitab.js";
+
 // Lakukan pemanggilan fungsi yang diperlukan di sini
 const fetchData = async () => {
 	try {
@@ -26,6 +28,10 @@ const fetchData = async () => {
 
 		console.log("Fetching and inserting data if needed...");
 		await fetchAndInsertDataIfNeeded(); // Memanggil fungsi fetchAndInsertDataIfNeeded untuk mengambil dan memasukkan data jika diperlukan
+		console.log("Data fetched and inserted successfully.");
+
+		console.log("Fetching minitab...");
+		await fetchDataMinitab();
 		console.log("Data fetched and inserted successfully.");
 
 		console.log("All operations completed successfully.");

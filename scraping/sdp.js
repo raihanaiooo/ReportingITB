@@ -1,6 +1,7 @@
 import axios from "axios";
 import Login from "../cookies.js";
 import fs from "fs/promises";
+import createDbPool from "../config.js";
 import { insertSDP } from "../db/insert.js";
 
 const url = "https://it-helpdesk.itb.ac.id/api/v3/requests";
@@ -36,34 +37,36 @@ const generateHeaders = (cookies) => {
 	};
 };
 
-const checkCookieExpiration = async (cookies) => {
-	const now = Date.now();
-	for (const cookie of cookies) {
-		if (cookie.expires && cookie.expires * 1000 < now) {
-			return true;
-		}
-	}
-	return false;
-};
+// const checkCookieExpiration = async (cookies) => {
+// 	const now = Date.now();
+// 	for (const cookie of cookies) {
+// 		if (cookie.expires && cookie.expires * 1000 < now) {
+// 			return true;
+// 		}
+// 	}
+// 	return false;
+// };
 
-const loginIfCookieExpired = async () => {
-	try {
-		const cookiesData = await fs.readFile("./cookies.json");
-		const cookies = JSON.parse(cookiesData);
+// const loginIfCookieExpired = async () => {
+// 	try {
+// 		const cookiesData = await fs.readFile("./cookies.json");
+// 		const cookies = JSON.parse(cookiesData);
 
-		if (await checkCookieExpiration(cookies)) {
-			console.log("Cookies have expired. Logging in again...");
-			await Login(); // Lakukan login ulang
-		} else {
-			console.log("Cookies are still valid. Skipping login.");
-		}
-	} catch (error) {
-		console.error("Error during login check:", error);
-	}
-};
+// 		if (await checkCookieExpiration(cookies)) {
+// 			console.log("Cookies have expired. Logging in again...");
+// 			// Jika cookie telah kedaluwarsa, jalankan kembali loginSDP
+// 			await Login();
+// 		} else {
+// 			console.log("Cookies are still valid. Skipping login.");
+// 		}
+// 	} catch (error) {
+// 		console.error("Error during login check:", error);
+// 	}
+// };
 
 const checkData = async () => {
 	try {
+		console.log("Checking data...");
 		const rowCount = await fetchCountFromDatabase();
 		if (rowCount === 0) {
 			console.log("Database is empty. Fetching data...");
@@ -72,13 +75,34 @@ const checkData = async () => {
 			console.log("Database is not empty. No need to fetch data.");
 		}
 	} catch (error) {
-		console.error("Error checking row count:", error.message);
+		console.error("Error in checkData:", error.message);
+	}
+};
+
+const fetchCountFromDatabase = async () => {
+	let connection;
+	try {
+		const pool = createDbPool();
+		connection = await pool.getConnection();
+		const [rows] = await connection.query(
+			"SELECT COUNT(*) as count FROM ticketing"
+		);
+		const rowCount = rows[0].count;
+
+		return rowCount;
+	} catch (error) {
+		throw new Error(
+			"Gagal mengambil jumlah baris dari database: " + error.message
+		);
+	} finally {
+		if (connection) connection.release();
 	}
 };
 
 const fetchDataSDP = async () => {
 	try {
-		await loginIfCookieExpired();
+		// await loginIfCookieExpired();
+		await Login();
 		const today = new Date();
 		let continueFetching = true;
 		let lastFetchedDate = new Date(0);
@@ -167,7 +191,7 @@ const fetchPage = async (page, recordsFetched = 0) => {
 
 		const response = await axios.get(fullUrl, {
 			headers: {
-				...generateHeaders(cookies),
+				...generateHeaders(cookies), // Setel cookies ke header permintaan
 				Referer: "https://it-helpdesk.itb.ac.id/WOListView.do",
 				"Referrer-Policy": "strict-origin-when-cross-origin",
 			},
@@ -275,7 +299,7 @@ const fetchedDataSDP = async (lastPageFetched = 1) => {
 			lastPageFetched++;
 			if (allRequests.length >= recordsPerIteration) {
 				console.log(
-					`Mengambil ${recordsPerIteration} rekord. Menunggu 5 menit.`
+					`Mengambil ${recordsPerIteration} rekord. Menunggu 30 menit.`
 				);
 				await delay(fetchInterval);
 			}
@@ -287,6 +311,7 @@ const fetchedDataSDP = async (lastPageFetched = 1) => {
 
 const fetchAndInsertDataIfNeeded = async () => {
 	try {
+		await Login();
 		const allRequests = await fetchPage(1);
 
 		allRequests.sort((a, b) => {
