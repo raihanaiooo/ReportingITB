@@ -37,33 +37,6 @@ const generateHeaders = (cookies) => {
 	};
 };
 
-// const checkCookieExpiration = async (cookies) => {
-// 	const now = Date.now();
-// 	for (const cookie of cookies) {
-// 		if (cookie.expires && cookie.expires * 1000 < now) {
-// 			return true;
-// 		}
-// 	}
-// 	return false;
-// };
-
-// const loginIfCookieExpired = async () => {
-// 	try {
-// 		const cookiesData = await fs.readFile("./cookies.json");
-// 		const cookies = JSON.parse(cookiesData);
-
-// 		if (await checkCookieExpiration(cookies)) {
-// 			console.log("Cookies have expired. Logging in again...");
-// 			// Jika cookie telah kedaluwarsa, jalankan kembali loginSDP
-// 			await Login();
-// 		} else {
-// 			console.log("Cookies are still valid. Skipping login.");
-// 		}
-// 	} catch (error) {
-// 		console.error("Error during login check:", error);
-// 	}
-// };
-
 const checkData = async () => {
 	try {
 		console.log("Checking data...");
@@ -101,11 +74,9 @@ const fetchCountFromDatabase = async () => {
 
 const fetchDataSDP = async () => {
 	try {
-		// await loginIfCookieExpired();
 		await Login();
 		const today = new Date();
 		let continueFetching = true;
-		let lastFetchedDate = new Date(0);
 
 		while (continueFetching) {
 			const allRequests = await fetchPage(1);
@@ -124,33 +95,15 @@ const fetchDataSDP = async () => {
 				return false;
 			});
 
-			continueFetching = !hasFutureData;
-
 			if (hasFutureData) {
 				continueFetching = false;
 				console.log("Reached today's date. Pausing until new data arrives...");
+				await delay(600000); // Pause for 10 minutes
 			} else {
 				console.log("No data up to today's date. Continuing fetching...");
 			}
-
-			if (allRequests.length > 0) {
-				const lastRequest = allRequests[allRequests.length - 1];
-				if (lastRequest.created_time) {
-					lastFetchedTime = lastRequest.created_time.display_value;
-				} else {
-					console.error("Last request does not have a created_time property.");
-				}
-			} else {
-				console.error("No requests fetched.");
-			}
 		}
 
-		setInterval(async () => {
-			if (!continueFetching) {
-				console.log("Resuming fetching...");
-				await fetchedDataSDP(lastFetchedDate);
-			}
-		}, 600000);
 		console.log("Data insertion completed.");
 	} catch (error) {
 		console.error("Error:", error.message);
@@ -311,69 +264,90 @@ const fetchedDataSDP = async (lastPageFetched = 1) => {
 
 const fetchAndInsertDataIfNeeded = async () => {
 	try {
-		await Login();
-		const allRequests = await fetchPage(1);
+		// Fetch data
+		let allRequests = await fetchPage(1);
 
-		allRequests.sort((a, b) => {
-			return (
+		// If no data fetched, exit
+		if (allRequests.length === 0) {
+			console.log("No more data to fetch. Exiting...");
+			return;
+		}
+
+		// Sort fetched data by created time
+		allRequests.sort(
+			(a, b) =>
 				new Date(a.created_time.display_value) -
 				new Date(b.created_time.display_value)
-			);
-		});
+		);
 
+		// Determine last fetched data from database
 		const getLastFetchedDataFromDB = async () => {
+			// Implement logic to get last fetched data from DB
+			// For example:
 			return {
 				id_scrape: lastFetchedId,
 				created_time: lastFetchedTime,
 			};
 		};
 
-		const lastFetched = allRequests[allRequests.length - 1];
-		if (lastFetched && lastFetched.created_time) {
-			const lastFetchedDB = await getLastFetchedDataFromDB();
+		// Get last fetched data from DB
+		const lastFetchedDB = await getLastFetchedDataFromDB();
 
-			if (
-				lastFetched.created_time.display_value !==
-				lastFetchedDB.createdTimeDisplayValue
-			) {
-				const itemsToInsert = allRequests.slice(-200);
+		// If there is new data to insert
+		if (
+			lastFetchedDB &&
+			allRequests.length > 0 &&
+			allRequests[0].created_time.display_value !== lastFetchedDB.created_time
+		) {
+			// Process and insert new data
+			const itemsToInsert = allRequests.filter(
+				(request) =>
+					new Date(request.created_time.display_value) >
+					new Date(lastFetchedDB.created_time)
+			);
 
-				console.log("Membuka koneksi database...");
-
-				itemsToInsert.forEach(async (item) => {
-					if (!uniqueCreatedTimes[item.created_time.display_value]) {
-						try {
-							await insertDataToDB(item);
-							uniqueCreatedTimes[item.created_time.display_value] = true;
-							console.log(
-								`Data dengan ID ${item.id} dimasukkan ke dalam database.`
-							);
-						} catch (error) {
-							console.error(
-								`Error saat memasukkan data dengan ID ${item.id}:`,
-								error.message
-							);
-						}
-					} else {
-						console.log(
-							`Skipping request with ID ${item.id} due to duplicate created_time.`
+			// Insert each item to DB
+			await Promise.all(
+				itemsToInsert.map(async (item) => {
+					try {
+						await insertSDP({
+							requests: [
+								{
+									id: item.id,
+									status: item.status.name,
+									createdTimeDisplayValue:
+										item.created_time.display_value || null,
+								},
+							],
+						});
+						console.log(`Data with ID ${item.id} inserted into the database.`);
+					} catch (error) {
+						console.error(
+							`Error inserting data with ID ${item.id}:`,
+							error.message
 						);
 					}
-				});
+				})
+			);
 
-				console.log("Menutup koneksi database...");
-			} else {
-				console.log("Tidak ada data baru untuk diambil. Keluar...");
-			}
+			// Update last fetched data in DB
+			lastFetchedId = itemsToInsert[itemsToInsert.length - 1].id;
+			lastFetchedTime =
+				itemsToInsert[itemsToInsert.length - 1].created_time.display_value;
+
+			console.log("Data insertion completed.");
+		} else {
+			console.log("No new data to insert.");
 		}
 	} catch (error) {
 		console.error("Error fetching and inserting data:", error.message);
 	}
 };
+// Initial call to fetch data from SDP
+await fetchDataSDP();
 
-const fetchInterval = 30 * 60 * 1000;
+// Set interval to fetch and insert data
 setInterval(fetchAndInsertDataIfNeeded, fetchInterval);
-
 export {
 	fetchDataSDP,
 	fetchedDataSDP,

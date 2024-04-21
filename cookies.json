@@ -1,7 +1,7 @@
 [
   {
     "name": "_zcsr_tmp",
-    "value": "15ae7a76c0c8839a0e59824fca8ed6c7ee24dddbdaccb0d1905f7b0260349532a63a2627277ba61079d2e0e95ef10090a604fde2bc4f7146d33d28fdabc2a9f8",
+    "value": "7a9a325aa879cc285a24da445455f0f00cd9df83ea5dfad54dbed9908cde9f4e6269b526dad7449e303ff4f0d00cec9495a52044012b7e3545fa99bed07851e3",
     "domain": "it-helpdesk.itb.ac.id",
     "path": "/",
     "expires": -1,
@@ -16,7 +16,7 @@
   },
   {
     "name": "sdpcsrfcookie",
-    "value": "15ae7a76c0c8839a0e59824fca8ed6c7ee24dddbdaccb0d1905f7b0260349532a63a2627277ba61079d2e0e95ef10090a604fde2bc4f7146d33d28fdabc2a9f8",
+    "value": "7a9a325aa879cc285a24da445455f0f00cd9df83ea5dfad54dbed9908cde9f4e6269b526dad7449e303ff4f0d00cec9495a52044012b7e3545fa99bed07851e3",
     "domain": "it-helpdesk.itb.ac.id",
     "path": "/",
     "expires": -1,
@@ -30,11 +30,11 @@
     "sourcePort": 443
   },
   {
-    "name": "mesdp957da9b096",
-    "value": "45eb5a79c954545ff0e802af91ee7a606e4050b36b2f024d4fd1ca04eb86cfa7",
+    "name": "mesdp9b431d8b2b",
+    "value": "d5fce59888916b527155dced5e76df33bd91183618336bbdfc0275d007435a63",
     "domain": "it-helpdesk.itb.ac.id",
     "path": "/",
-    "expires": 1717568916.132665,
+    "expires": 1717578970.753413,
     "size": 79,
     "httpOnly": true,
     "secure": true,
@@ -46,10 +46,10 @@
   },
   {
     "name": "sdplogincsrfcookie",
-    "value": "14bae2e4-7a75-49fd-9bc3-2753ba536ea6",
+    "value": "144a5b0b-f1bf-4d6d-ae1c-cadb3dee63cb",
     "domain": "it-helpdesk.itb.ac.id",
     "path": "/",
-    "expires": 1713702516.22562,
+    "expires": 1713712570.844662,
     "size": 54,
     "httpOnly": false,
     "secure": true,
@@ -64,7 +64,7 @@
     "value": "true",
     "domain": "it-helpdesk.itb.ac.id",
     "path": "/",
-    "expires": 1717568916.132497,
+    "expires": 1717578970.753353,
     "size": 8,
     "httpOnly": true,
     "secure": true,
@@ -76,10 +76,10 @@
   },
   {
     "name": "febbc30d",
-    "value": "b0cfa65c13de462ebd071112c45119bc",
+    "value": "4cef6000a70743fd83215f2ca37dc20b",
     "domain": "it-helpdesk.itb.ac.id",
     "path": "/",
-    "expires": 1717568916.132616,
+    "expires": 1717578970.753385,
     "size": 40,
     "httpOnly": true,
     "secure": true,
@@ -106,7 +106,7 @@
   },
   {
     "name": "JSESSIONIDSSO",
-    "value": "B3F34B8A02D434FBB1BF71DC3EFC797A",
+    "value": "03C42147C3E45435444FDFD68B332ADD",
     "domain": "it-helpdesk.itb.ac.id",
     "path": "/",
     "expires": -1,
@@ -121,7 +121,7 @@
   },
   {
     "name": "SDPSESSIONID",
-    "value": "4DEB8D324D61D56B4611F87B966CA215",
+    "value": "AFC23C675CDCE8EFDA979B9526D2C866",
     "domain": "it-helpdesk.itb.ac.id",
     "path": "/",
     "expires": -1,
